@@ -583,7 +583,7 @@ class EgGutProAnalysis:
                 self.df_eval.loc[self.li_new_sample_name[i], 'num_harmful_species'] = harmful_number
                 self.df_eval.loc[self.li_new_sample_name[i], 'num_beneficial_species'] = beneficial_number
 
-                #self.df_eval.loc[self.li_new_sample_name[i], 'num_total_species'] = self.li_observed[i]
+                self.df_eval.loc[self.li_new_sample_name[i], 'num_total_species'] = self.li_observed[i]
                 #self.df_eval.loc[self.li_new_sample_name[i], 'num_other_species'] = self.li_observed[i] - harmful_number - beneficial_number
                               
         except Exception as e:

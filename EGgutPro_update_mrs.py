@@ -79,7 +79,7 @@ class EgGutProUpdateMRS:
         self.path_healthy = f"{curdir}/input/EGgutPro_healthy_person_profile_v2.xlsx"
         self.path_db = f"{curdir}/input/EGgutPro_db_abundance.xlsx"
         self.path_mrs_db = f"{curdir}/input/EGgutPro_mrs_db.xlsx"
-        self.path_hist = f"{curdir}/output/mrs_hist.png"
+        self.path_hist = f"{curdir}/output/EGgutPro_mrs_hist.png"
         self.path_percentile_rank_db = f"{curdir}/input/EGgutPro_percentile_rank_db.csv"
 
         self.df_beta = None
