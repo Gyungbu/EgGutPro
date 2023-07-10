@@ -1,5 +1,5 @@
 ##<Usage: python Script.py {path_exp}>
-### ex) python eg_gutpro_percentile_rank.py "/home/kbkim/EgGutPro/input/GUT_mirror_output_3175.csv"
+### ex) python eg_gutpro_percentile_rank.py "/home/kbkim/EgGutPro/input/EGgutPro_one_sample.csv"
 
 import os, datetime
 import pandas as pd
@@ -15,7 +15,7 @@ from skbio.stats.composition import multiplicative_replacement, clr
 # Check if the script is being called with the correct arguments
 if len(sys.argv) != 2:
     print("Usage: python Script.py <path_exp>")
-    print("Example: python eg_gutpro_percentile_rank.py \"/home/kbkim/EgGutPro/input/GUT_mirror_output_3175.csv\"")
+    print("Example: python eg_gutpro_percentile_rank.py \"/home/kbkim/EgGutPro/input/EGgutPro_one_sample.csv\"")
     sys.exit(1)
     
 # path_exp : Path of Merged Proportion file to analyze
@@ -44,6 +44,11 @@ def WriteLog(functionname, msg, type='INFO', fplog=None):
         fplog.write(writestr)
         fplog.flush()
 
+def filter_species(taxon_str_for_domain):
+    splited_by_taxonomy = taxon_str_for_domain.split("|")
+    species_name = splited_by_taxonomy[len(splited_by_taxonomy) - 1]  # 계문강목과속종 중 종만 필터링!!!
+    return species_name
+
 ###################################
 # MainClass
 ###################################
@@ -60,10 +65,10 @@ class EgGutProAnalysis:
 
         curdir = os.path.dirname(os.path.abspath(__file__))
         self.path_ref = f"{curdir}/input/EGgutPro_mircobe_list.xlsx"       
-        #self.path_healthy = f"{curdir}/input/healthy_profile_{self.species}.xlsx"
+        self.path_healthy = f"{curdir}/input/EGgutPro_healthy_person_profile_v2.xlsx"
         self.path_mrs_db = f"{curdir}/input/EGgutPro_mrs_db.xlsx"
         self.path_percentile_rank_db = f"{curdir}/input/EGgutPro_percentile_rank_db.csv"
-        self.path_db = f"{curdir}/input/db_abundance.xlsx"
+        self.path_db = f"{curdir}/input/EGgutPro_db_abundance.xlsx"
                
         self.path_percentile_rank_output = f"{curdir}/output/EGgutPro_percentile_rank.csv"
         self.path_eval_output = f"{curdir}/output/EGgutPro_eval.csv"
@@ -105,7 +110,7 @@ class EgGutProAnalysis:
             self.df_dysbiosis = pd.read_excel(self.path_ref, sheet_name = f"harmful_beneficial_taxa")
             self.df_probio = pd.read_excel(self.path_ref, sheet_name = f"probio_taxa")
             
-            #self.df_healthy = pd.read_excel(self.path_healthy)
+            self.df_healthy = pd.read_excel(self.path_healthy, sheet_name="RA")
             self.df_exp = pd.read_csv(self.path_exp)
             self.df_mrs_db = pd.read_excel(self.path_mrs_db, index_col=0) 
             self.df_exp = pd.read_csv(self.path_exp)
@@ -119,6 +124,11 @@ class EgGutProAnalysis:
             self.df_dysbiosis.rename(columns = {"NCBI name": "ncbi_name", "MIrROR name": "microbiome", "Health sign": "beta", "subtract": "microbiome_subtract"}, inplace=True)
             self.df_dysbiosis = self.df_dysbiosis[["ncbi_name", "microbiome", "beta", "microbiome_subtract"]]
             self.df_dysbiosis['beta'] = self.df_dysbiosis['beta'].replace({'유해': 1, '유익': -1})
+
+            self.df_healthy = self.df_healthy[self.df_healthy['Taxonomy'].str.contains('s__')]
+            self.df_healthy['Taxonomy'] = self.df_healthy['Taxonomy'].apply(filter_species)
+            self.df_healthy['Taxonomy'] = self.df_healthy['Taxonomy'].str.replace(' ','_')
+            self.df_healthy = self.df_healthy.rename(columns={'Taxonomy': 'taxa'})
             
             print(self.df_exp)
             # Delete the diversity, observed rows
@@ -134,7 +144,7 @@ class EgGutProAnalysis:
             self.li_phenotype = list(dict.fromkeys(self.df_beta['phenotype']))
             
             print(self.df_beta)
-            
+                      
         except Exception as e:
             print(str(e))
             rv = False
@@ -288,55 +298,30 @@ class EgGutProAnalysis:
         
         try: 
             self.df_mrs['HealthyDistance'] = 0     
-            
-            np_healthy_abundance = self.df_healthy['RA'].to_numpy()
-            np_healthy_abundance = np.append(np_healthy_abundance, 100-np_healthy_abundance.sum())
-
-            np_healthy_abundance = clr(np_healthy_abundance)
-            
+                       
             # Subtract the abundance - df_exp_healthy
             for idx in range(len(self.li_new_sample_name)): 
+                healthy_dist = 0
+                
                 df_exp_one = self.df_exp[['taxa', self.li_new_sample_name[idx]]]
                 df_exp_one = df_exp_one[df_exp_one[self.li_new_sample_name[idx]] != 0]
-                np_abundance = np.array([], dtype=np.float64).reshape(0,1)
-                np_abundance_others = np.ones((1,1), dtype=float)                
+                           
+                for donor in self.df_healthy.iloc[:,1:].columns:
+                    df_healthy_one = self.df_healthy[['taxa', donor]]
+                    df_healthy_one = df_healthy_one[df_healthy_one[donor] != 0]
+                                      
+                    df_merged = pd.merge(df_exp_one, df_healthy_one, how='outer',on='taxa')
+                    df_merged = df_merged.fillna(0)
+                    
+                    np_abundance = df_merged.iloc[:, 1:3]
+                    np_abundance = np.transpose(np_abundance)
+                    np_abundance = multiplicative_replacement(np_abundance)                     
+                    np_abundance = clr(np_abundance)                  
+                    np_abundance = np.transpose(np_abundance)             
+                    # Calculate healthy distance for each new sample
+                    healthy_dist += np.linalg.norm(np_abundance[:, 0] - np_abundance[:, 1])  
                 
-                for idx_healthy, row_healthy in self.df_healthy.iterrows(): 
-                    li_micro_sub = []
-                    li_micro = row_healthy['microbiome'].split('\n')
-                    np_abundance_temp = np.zeros((1,1), dtype=float)
-
-                    for micro in li_micro:
-                        condition_append = (df_exp_one.taxa == micro)
-
-                        if len(df_exp_one[condition_append]) > 0:
-                            np_abundance_temp += df_exp_one[condition_append].to_numpy()[:,1:].astype(np.float64)
-                            np_abundance_others -= df_exp_one[condition_append].to_numpy()[:,1:].astype(np.float64)
-
-                    if pd.isna(row_healthy['microbiome_subtract']) is False:
-                        li_micro_sub = row_healthy['microbiome_subtract'].split('\n')
-
-                        for micro_sub in li_micro_sub:
-                            condition_sub = (df_exp_one.taxa == micro_sub)
-
-                            if len(df_exp_one[condition_sub]) > 0:
-                                np_abundance_temp -= df_exp_one[condition_sub].to_numpy()[:,1:].astype(np.float64)
-                                np_abundance_others += df_exp_one[condition_sub].to_numpy()[:,1:].astype(np.float64)
-
-                    np_abundance = np.concatenate((np_abundance,np_abundance_temp),axis=0)
-
-                np_abundance = np.concatenate((np_abundance,np_abundance_others),axis=0)
-                np_abundance = np_abundance.transpose()
-
-                # Apply multiplicative replacement and CLR transformations
-                np_abundance = multiplicative_replacement(np_abundance)
-                np_abundance = clr(np_abundance)   
-            
-                # Calculate healthy distance for each new sample
-                healthy_dist = np.linalg.norm(np_abundance - np_healthy_abundance)  
-                
-                self.df_mrs.loc[self.li_new_sample_name[idx], 'HealthyDistance'] = -healthy_dist
-            
+                self.df_mrs.loc[self.li_new_sample_name[idx], 'HealthyDistance'] = -healthy_dist / 8                                
         except Exception as e:
             print(str(e))
             rv = False
@@ -364,7 +349,7 @@ class EgGutProAnalysis:
             self.df_mrs['Diversity'] = self.li_diversity
             
             # Append the Dysbiosis, HealthyDistance, Diversity, TotalRiskScore to phenotype list
-            self.li_phenotype += ['DysbiosisHarmful', 'DysbiosisBeneficial', 'Diversity']
+            self.li_phenotype += ['DysbiosisHarmful', 'DysbiosisBeneficial', 'Diversity', 'HealthyDistance']
 
             # Create an empty data frame with the same index and columns as the df_mrs data frame
             self.df_percentile_rank = pd.DataFrame(index = self.li_new_sample_name, columns = self.li_phenotype)
@@ -593,13 +578,13 @@ class EgGutProAnalysis:
                             
                 self.df_eval.loc[self.li_new_sample_name[i], 'harmful_abundance[%]'] = harmful_abundance * 100
                 self.df_eval.loc[self.li_new_sample_name[i], 'beneficial_abundance[%]'] = beneficial_abundance * 100
-                self.df_eval.loc[self.li_new_sample_name[i], 'other_abundance[%]'] = 100 - 100 * (harmful_abundance + beneficial_abundance)
+                #self.df_eval.loc[self.li_new_sample_name[i], 'other_abundance[%]'] = 100 - 100 * (harmful_abundance + beneficial_abundance)
                 
                 self.df_eval.loc[self.li_new_sample_name[i], 'num_harmful_species'] = harmful_number
                 self.df_eval.loc[self.li_new_sample_name[i], 'num_beneficial_species'] = beneficial_number
 
-                self.df_eval.loc[self.li_new_sample_name[i], 'num_total_species'] = self.li_observed[i]
-                self.df_eval.loc[self.li_new_sample_name[i], 'num_other_species'] = self.li_observed[i] - harmful_number - beneficial_number
+                #self.df_eval.loc[self.li_new_sample_name[i], 'num_total_species'] = self.li_observed[i]
+                #self.df_eval.loc[self.li_new_sample_name[i], 'num_other_species'] = self.li_observed[i] - harmful_number - beneficial_number
                               
         except Exception as e:
             print(str(e))
@@ -693,7 +678,7 @@ if __name__ == '__main__':
     eggutanalysis.ReadDB()
     eggutanalysis.CalculateMRS()    
     eggutanalysis.CalculateDysbiosis()    
-    #eggutanalysis.CalculateHealthyDistance()
+    eggutanalysis.CalculateHealthyDistance()
     eggutanalysis.CalculatePercentileRank()
     #eggutanalysis.DrawScatterPlot()    
     eggutanalysis.EvaluatePercentileRank()    
