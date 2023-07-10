@@ -1,5 +1,5 @@
 ##<Usage: python Script.py {path_exp}>
-### ex) python eg_gutpro_percentile_rank.py "/home/kbkim/EgGutPro/input/EGgutPro_one_sample.csv"
+### ex) python EGgutPro_percentile_rank.py "/home/kbkim/EgGutPro/input/EGgutPro_one_sample.csv"
 
 import os, datetime
 import pandas as pd
@@ -15,7 +15,7 @@ from skbio.stats.composition import multiplicative_replacement, clr
 # Check if the script is being called with the correct arguments
 if len(sys.argv) != 2:
     print("Usage: python Script.py <path_exp>")
-    print("Example: python eg_gutpro_percentile_rank.py \"/home/kbkim/EgGutPro/input/EGgutPro_one_sample.csv\"")
+    print("Example: python EGgutPro_percentile_rank.py \"/home/kbkim/EgGutPro/input/EGgutPro_one_sample.csv\"")
     sys.exit(1)
     
 # path_exp : Path of Merged Proportion file to analyze
