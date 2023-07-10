@@ -1,0 +1,31 @@
+sample_name,ncbi_name,abundance
+20230511_BC85,Actinobacteria,0.001453488
+20230511_BC85,Salmonella enterica,0.0
+20230511_BC85,Barnesiella,0.0
+20230511_BC85,Clostridium difficile,0.000695147
+20230511_BC85,Clostridium bolteae,0.001074317
+20230511_BC85,Clostridium perfringens,0.0
+20230511_BC85,Clostridium ramosum,0.000568756
+20230511_BC85,Clostridium spiroforme,0.0
+20230511_BC85,Coprococcus eutactus,0.0
+20230511_BC85,Enterobacter aerogenes,0.0
+20230511_BC85,Escherichia coli,0.023003038
+20230511_BC85,Ruminococcus,0.001074317
+20230511_BC85,Fusobacterium necrophorum,0.0
+20230511_BC85,Fusobacterium nucleatum,0.0
+20230511_BC85,Fusobacterium periodonticum,0.0
+20230511_BC85,Klebsiella,0.00012639
+20230511_BC85,Klebsiella oxytoca,0.0
+20230511_BC85,Klebsiella pneumoniae,0.00012639
+20230511_BC85,Neisseria,0.0
+20230511_BC85,Odoribacter spp.,0.000758342
+20230511_BC85,Oxalobacter formigenes,0.0
+20230511_BC85,Proteobacteria,0.050113751
+20230511_BC85,Pseudomonas aeruginosa,0.0
+20230511_BC85,Proteus mirabilis,0.0
+20230511_BC85,Ruminococcus gnavus,0.037917088
+20230511_BC85,Ruminococcus torques,0.001832659
+20230511_BC85,Serratia marcescens,0.0
+20230511_BC85,Shigella,-5.000000001366216e-09
+20230511_BC85,Staphylococcus aureus,0.0
+20230511_BC85,Veillonella,6.32e-05
