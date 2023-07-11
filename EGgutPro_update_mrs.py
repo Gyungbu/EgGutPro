@@ -127,8 +127,8 @@ class EgGutProUpdateMRS:
             self.df_beta = self.df_beta[["phenotype", "ncbi_name", "microbiome", "beta", "microbiome_subtract"]]
             self.df_beta['beta'] = self.df_beta['beta'].replace({'유해': 1, '유익': -1})    
 
-            self.df_dysbiosis.rename(columns = {"NCBI name": "ncbi_name", "MIrROR name": "microbiome", "Health sign": "beta", "subtract": "microbiome_subtract"}, inplace=True)
-            self.df_dysbiosis = self.df_dysbiosis[["ncbi_name", "microbiome", "beta", "microbiome_subtract"]]
+            self.df_dysbiosis.rename(columns = {"NCBI name": "ncbi_name", "MIrROR name": "microbiome", "Health sign": "beta", "subtract": "microbiome_subtract", "Exclude": "exclude"}, inplace=True)
+            self.df_dysbiosis = self.df_dysbiosis[["ncbi_name", "microbiome", "beta", "microbiome_subtract", "exclude"]]
             self.df_dysbiosis['beta'] = self.df_dysbiosis['beta'].replace({'유해': 1, '유익': -1})
             
             self.df_healthy = self.df_healthy[self.df_healthy['Taxonomy'].str.contains('s__')]
@@ -271,8 +271,8 @@ class EgGutProUpdateMRS:
                 dysbiosis_beneficial = 0
                 
                 for j in range(len(self.li_microbiome)):
-                    condition_harmful = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == 1) 
-                    condition_beneficial = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == -1) 
+                    condition_harmful = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == 1) & (self.df_dysbiosis.exclude != "Y") 
+                    condition_beneficial = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == -1) & (self.df_dysbiosis.exclude != "Y")
                     
                     if (len(self.df_dysbiosis[condition_harmful]) >= 1) & (len(self.df_dysbiosis[condition_beneficial]) == 0):
                         condition_micro = (self.df_exp.taxa == self.li_microbiome[j])
@@ -320,7 +320,7 @@ class EgGutProUpdateMRS:
             print(f"Error has occurred in the {myNAME} process")    
             sys.exit() 
     
-        return rv, rvmsg        
+        return rv, rvmsg             
 
     def CalculateHealthyDistance(self): 
         """

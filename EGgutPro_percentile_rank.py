@@ -128,8 +128,8 @@ class EgGutProAnalysis:
             self.df_beta = self.df_beta[["phenotype", "ncbi_name", "microbiome", "beta", "microbiome_subtract"]]
             self.df_beta['beta'] = self.df_beta['beta'].replace({'유해': 1, '유익': -1})
 
-            self.df_dysbiosis.rename(columns = {"NCBI name": "ncbi_name", "MIrROR name": "microbiome", "Health sign": "beta", "subtract": "microbiome_subtract"}, inplace=True)
-            self.df_dysbiosis = self.df_dysbiosis[["ncbi_name", "microbiome", "beta", "microbiome_subtract"]]
+            self.df_dysbiosis.rename(columns = {"NCBI name": "ncbi_name", "MIrROR name": "microbiome", "Health sign": "beta", "subtract": "microbiome_subtract", "Exclude": "exclude"}, inplace=True)
+            self.df_dysbiosis = self.df_dysbiosis[["ncbi_name", "microbiome", "beta", "microbiome_subtract", "exclude"]]
             self.df_dysbiosis['beta'] = self.df_dysbiosis['beta'].replace({'유해': 1, '유익': -1})
 
             self.df_healthy = self.df_healthy[self.df_healthy['Taxonomy'].str.contains('s__')]
@@ -151,7 +151,7 @@ class EgGutProAnalysis:
             self.li_phenotype = list(dict.fromkeys(self.df_beta['phenotype']))
             
             print(self.df_beta)
-                      
+                            
         except Exception as e:
             print(str(e))
             rv = False
@@ -238,8 +238,8 @@ class EgGutProAnalysis:
                 dysbiosis_beneficial = 0
                 
                 for j in range(len(self.li_microbiome)):
-                    condition_harmful = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == 1) 
-                    condition_beneficial = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == -1) 
+                    condition_harmful = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == 1) & (self.df_dysbiosis.exclude != "Y") 
+                    condition_beneficial = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == -1) & (self.df_dysbiosis.exclude != "Y")
                     
                     if (len(self.df_dysbiosis[condition_harmful]) >= 1) & (len(self.df_dysbiosis[condition_beneficial]) == 0):
                         condition_micro = (self.df_exp.taxa == self.li_microbiome[j])
@@ -540,8 +540,8 @@ class EgGutProAnalysis:
                 beneficial_number = 0
                 
                 for j in range(len(self.li_microbiome)):
-                    condition_harmful = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == 1) 
-                    condition_beneficial = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == -1) 
+                    condition_harmful = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == 1) & (self.df_dysbiosis.exclude != "Y")
+                    condition_beneficial = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == -1) & (self.df_dysbiosis.exclude != "Y")
                     
                     if (len(self.df_dysbiosis[condition_harmful]) >= 1) & (len(self.df_dysbiosis[condition_beneficial]) == 0):
                         condition_micro = (self.df_exp.taxa == self.li_microbiome[j])
@@ -589,8 +589,8 @@ class EgGutProAnalysis:
                 self.df_eval.loc[self.li_new_sample_name[i], 'beneficial_abundance[%]'] = beneficial_abundance * 100
                 #self.df_eval.loc[self.li_new_sample_name[i], 'other_abundance[%]'] = 100 - 100 * (harmful_abundance + beneficial_abundance)
                 
-                self.df_eval.loc[self.li_new_sample_name[i], 'num_harmful_species'] = harmful_number
-                self.df_eval.loc[self.li_new_sample_name[i], 'num_beneficial_species'] = beneficial_number
+                #self.df_eval.loc[self.li_new_sample_name[i], 'num_harmful_species'] = harmful_number
+                #self.df_eval.loc[self.li_new_sample_name[i], 'num_beneficial_species'] = beneficial_number
 
                 self.df_eval.loc[self.li_new_sample_name[i], 'num_total_species'] = self.li_observed[i]
                 #self.df_eval.loc[self.li_new_sample_name[i], 'num_other_species'] = self.li_observed[i] - harmful_number - beneficial_number
@@ -624,8 +624,8 @@ class EgGutProAnalysis:
             beneficial_mean_abundance = 0
 
             for j in range(len(self.li_microbiome)):
-                condition_harmful = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == 1) 
-                condition_beneficial = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == -1) 
+                condition_harmful = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == 1) & (self.df_dysbiosis.exclude != "Y")
+                condition_beneficial = (self.df_dysbiosis.microbiome == self.li_microbiome[j]) & (self.df_dysbiosis.beta == -1) & (self.df_dysbiosis.exclude != "Y")
 
                 if (len(self.df_dysbiosis[condition_harmful]) >= 1) & (len(self.df_dysbiosis[condition_beneficial]) == 0):
                     condition_micro = (self.df_db.taxa == self.li_microbiome[j])
