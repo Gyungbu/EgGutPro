@@ -104,6 +104,8 @@ class EgGutProAnalysis:
         self.li_microbiome = None
         self.li_ncbi_name = None
         self.li_probio_microbiome = None  
+        
+        self.observed_mean = None
 
     # Load the DB file
     # df_beta : Data frame of of Phenotype-Microbiome information
@@ -148,6 +150,8 @@ class EgGutProAnalysis:
             if (list(self.df_exp['taxa'][0:2]) == ['diversity', 'observed']) & (list(self.df_db['taxa'][0:2]) == ['diversity', 'observed']):
                 self.li_diversity = list(self.df_exp.iloc[0,1:]) # li_diversity : Alpha-Diversity list 
                 self.li_observed = list(self.df_exp.iloc[1,1:]) # li_observed : Number of Microbiome list
+                
+                self.observed_mean = self.df_db[(self.df_db.taxa == "observed")].mean(axis=1, numeric_only=True).values[0]
                 self.df_exp = self.df_exp.iloc[2:,:]
                 self.df_db = self.df_db.iloc[2:,:]
                             
@@ -593,13 +597,8 @@ class EgGutProAnalysis:
                             
                 self.df_eval.loc[self.li_new_sample_name[i], 'harmful_abundance[%]'] = harmful_abundance * 100
                 self.df_eval.loc[self.li_new_sample_name[i], 'beneficial_abundance[%]'] = beneficial_abundance * 100
-                #self.df_eval.loc[self.li_new_sample_name[i], 'other_abundance[%]'] = 100 - 100 * (harmful_abundance + beneficial_abundance)
-                
-                #self.df_eval.loc[self.li_new_sample_name[i], 'num_harmful_species'] = harmful_number
-                #self.df_eval.loc[self.li_new_sample_name[i], 'num_beneficial_species'] = beneficial_number
-
                 self.df_eval.loc[self.li_new_sample_name[i], 'num_total_species'] = self.li_observed[i]
-                #self.df_eval.loc[self.li_new_sample_name[i], 'num_other_species'] = self.li_observed[i] - harmful_number - beneficial_number
+
                               
         except Exception as e:
             print(str(e))
@@ -892,6 +891,7 @@ class EgGutProAnalysis:
                 self.df_eval.loc[self.li_new_sample_name[i], 'probio_abundance[%]'] = probio_abundance * 100
                 
             self.df_eval.loc[:,'probio_abundance_mean[%]'] = probio_abundance_mean * 100
+            self.df_eval.loc[:,'observed_mean'] = round(self.observed_mean)
             
             # Save the output file - df_eval
             self.df_eval.to_csv(self.path_eval_output, encoding="utf-8-sig", index_label='serial_number')   
