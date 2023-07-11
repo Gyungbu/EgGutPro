@@ -76,6 +76,7 @@ class EgGutProAnalysis:
         self.path_harmful = f"{curdir}/output/EGgutPro_harmful.csv"
         self.path_beneficial = f"{curdir}/output/EGgutPro_beneficial.csv"
         self.path_harmful_tot = f"{curdir}/output/EGgutPro_harmful_tot.csv"
+        self.path_probio_tot = f"{curdir}/output/EGgutPro_probio_tot.csv"
 
         ##ReadDB  에서 읽어들인데이타
         self.df_beta = None
@@ -94,6 +95,7 @@ class EgGutProAnalysis:
         self.df_harmful = None
         self.df_beneficial = None
         self.df_harmful_tot = None
+        self.df_probio_tot = None
         
         self.li_diversity = None
         self.li_observed = None
@@ -101,6 +103,7 @@ class EgGutProAnalysis:
         self.li_phenotype = None
         self.li_microbiome = None
         self.li_ncbi_name = None
+        self.li_probio_microbiome = None  
 
     # Load the DB file
     # df_beta : Data frame of of Phenotype-Microbiome information
@@ -132,6 +135,9 @@ class EgGutProAnalysis:
             self.df_dysbiosis = self.df_dysbiosis[["ncbi_name", "microbiome", "beta", "microbiome_subtract", "exclude"]]
             self.df_dysbiosis['beta'] = self.df_dysbiosis['beta'].replace({'유해': 1, '유익': -1})
 
+            self.df_probio.rename(columns = {"NCBI name": "ncbi_name", "MIrROR name": "microbiome", "subtract": "microbiome_subtract"}, inplace=True)
+            self.df_probio = self.df_probio[["ncbi_name", "microbiome", "microbiome_subtract"]]
+            
             self.df_healthy = self.df_healthy[self.df_healthy['Taxonomy'].str.contains('s__')]
             self.df_healthy['Taxonomy'] = self.df_healthy['Taxonomy'].apply(filter_species)
             self.df_healthy['Taxonomy'] = self.df_healthy['Taxonomy'].str.replace(' ','_')
@@ -665,10 +671,7 @@ class EgGutProAnalysis:
 
             self.df_eval.loc[:,'harmful_mean_abundance[%]'] = harmful_mean_abundance * 100
             self.df_eval.loc[:,'beneficial_mean_abundance[%]'] = beneficial_mean_abundance * 100
-            
-            # Save the output file - df_eval
-            self.df_eval.to_csv(self.path_eval_output, encoding="utf-8-sig", index_label='serial_number')
-                    
+                                
         except Exception as e:
             print(str(e))
             rv = False
@@ -759,7 +762,7 @@ class EgGutProAnalysis:
             print(str(e))
             rv = False
             rvmsg = str(e)
-            print("Error has occurred in the HarmfulMicrobiome process")
+            print(f"Error has occurred in the {myNAME} process")
             sys.exit()
     
         return rv, rvmsg  
@@ -838,11 +841,116 @@ class EgGutProAnalysis:
             print(str(e))
             rv = False
             rvmsg = str(e)
-            print("Error has occurred in the BeneficialMicrobiome process")
+            print(f"Error has occurred in the {myNAME} process")
             sys.exit()
     
         return rv, rvmsg       
+
+
     
+    
+    
+    
+    
+    def CalculateProbioRatio(self): 
+        """
+        Calculate the Beneficial Probio Ratio. 
+
+        Returns:
+        A tuple (success, message), where success is a boolean indicating whether the operation was successful,
+        and message is a string containing a success or error message.
+        """         
+        myNAME = self.__class__.__name__+"::"+sys._getframe().f_code.co_name
+        WriteLog(myNAME, "In", type='INFO', fplog=self.__fplog)
+        
+        rv = True
+        rvmsg = "Success"
+        
+        try: 
+            self.li_probio_microbiome = list(dict.fromkeys(self.df_probio['microbiome']))
+            
+            for i in range(len(self.li_new_sample_name)):
+                
+                probio_abundance = 0
+                probio_abundance_mean = 0
+                
+                for j in range(len(self.li_probio_microbiome)):                                    
+                    condition_micro = (self.df_exp.taxa == self.li_probio_microbiome[j])
+                    condition_micro_db = (self.df_db.taxa == self.li_probio_microbiome[j])
+                    
+                    abundance = 0
+                    abundance_mean = 0
+
+                    if (len(self.df_exp[condition_micro]) > 0):      
+                        abundance += self.df_exp[condition_micro][self.li_new_sample_name[i]].values[0]    
+                        abundance_mean += self.df_db[condition_micro_db].mean(axis=1, numeric_only=True).values[0]    
+
+
+                    probio_abundance += abundance  
+                    probio_abundance_mean += abundance_mean
+                                                        
+                self.df_eval.loc[self.li_new_sample_name[i], 'probio_abundance[%]'] = probio_abundance * 100
+                
+            self.df_eval.loc[:,'probio_abundance_mean[%]'] = probio_abundance_mean * 100
+            
+            # Save the output file - df_eval
+            self.df_eval.to_csv(self.path_eval_output, encoding="utf-8-sig", index_label='serial_number')   
+            
+        except Exception as e:
+            print(str(e))
+            rv = False
+            rvmsg = str(e)
+            print(f"Error has occurred in the {myNAME} process")    
+            sys.exit()
+            
+        return rv, rvmsg  
+    
+    def Probio(self):
+        """
+        Save the list of Probio as an csv file.
+
+        Returns:
+        A tuple (success, message), where success is a boolean indicating whether the operation was successful,
+        and message is a string containing a success or error message.
+        """  
+        myNAME = self.__class__.__name__+"::"+sys._getframe().f_code.co_name
+        WriteLog(myNAME, "In", type='INFO', fplog=self.__fplog)
+        
+        rv = True
+        rvmsg = "Success"
+        
+        try:     
+            json_probio_abundance = []
+            
+            for i in range(len(self.li_new_sample_name)):
+                for idx_probio, row_probio in self.df_probio.iterrows(): 
+                    
+                    abundance = 0
+                    condition_probio = (self.df_exp.taxa == row_probio["microbiome"])
+                    if (len(self.df_exp[condition_probio]) > 0):                        
+                        abundance = self.df_exp[condition_probio][self.li_new_sample_name[i]].values[0]
+                    
+                    json_probio_abundance.append({"sample_name" : self.li_new_sample_name[i], "ncbi_name" : row_probio["ncbi_name"], "abundance" : abundance})
+            df_probio_abundance = pd.DataFrame.from_dict(json_probio_abundance)   
+                           
+            self.df_probio_tot = pd.DataFrame(columns = ["sample_name", "ncbi_name", "abundance"])
+
+            for i in range(len(self.li_new_sample_name)):
+                condition = (df_probio_abundance.sample_name == self.li_new_sample_name[i])           
+                df_tot = df_probio_abundance[condition].sort_values(by=['abundance'], ascending=False)
+                self.df_probio_tot = pd.concat([self.df_probio_tot,df_tot])
+                
+            self.df_probio_tot = self.df_probio_tot.set_index(keys=['sample_name'], inplace=False, drop=True)           
+            self.df_probio_tot.to_csv(self.path_probio_tot)   
+            
+        except Exception as e:
+            print(str(e))
+            rv = False
+            rvmsg = str(e)
+            print(f"Error has occurred in the {myNAME} process")
+            sys.exit()
+    
+        return rv, rvmsg     
 ####################################
 # main
 ####################################
@@ -860,6 +968,8 @@ if __name__ == '__main__':
     eggutanalysis.CalculateAverageMicrobiomeRatio()
     eggutanalysis.HarmfulMicrobiome()
     eggutanalysis.BeneficialMicrobiome()
+    eggutanalysis.CalculateProbioRatio()
+    eggutanalysis.Probio()    
     
     print('Analysis Complete')
     
