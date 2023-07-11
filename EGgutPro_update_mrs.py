@@ -358,10 +358,12 @@ class EgGutProUpdateMRS:
                     np_abundance = multiplicative_replacement(np_abundance)                     
                     np_abundance = clr(np_abundance)                  
                     np_abundance = np.transpose(np_abundance)             
-                    # Calculate healthy distance for each new sample
+                    
                     healthy_dist += np.linalg.norm(np_abundance[:, 0] - np_abundance[:, 1])  
                 
-                self.df_mrs.loc[self.li_new_sample_name[idx], 'HealthyDistance'] = -healthy_dist / 8                                
+                # Calculate healthy distance for each new sample
+                self.df_mrs.loc[self.li_new_sample_name[idx], 'HealthyDistance'] = -healthy_dist / 8                  
+                
         except Exception as e:
             print(str(e))
             rv = False

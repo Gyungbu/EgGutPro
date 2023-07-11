@@ -75,6 +75,7 @@ class EgGutProAnalysis:
         self.path_scatterplot_output = f"{curdir}/output/EGgutPro_scatterplot.png"
         self.path_harmful = f"{curdir}/output/EGgutPro_harmful.csv"
         self.path_beneficial = f"{curdir}/output/EGgutPro_beneficial.csv"
+        self.path_harmful_tot = f"{curdir}/output/EGgutPro_harmful_tot.csv"
 
         ##ReadDB  에서 읽어들인데이타
         self.df_beta = None
@@ -92,6 +93,7 @@ class EgGutProAnalysis:
         self.df_eval = None
         self.df_harmful = None
         self.df_beneficial = None
+        self.df_harmful_tot = None
         
         self.li_diversity = None
         self.li_observed = None
@@ -323,10 +325,12 @@ class EgGutProAnalysis:
                     np_abundance = multiplicative_replacement(np_abundance)                     
                     np_abundance = clr(np_abundance)                  
                     np_abundance = np.transpose(np_abundance)             
-                    # Calculate healthy distance for each new sample
+                    
                     healthy_dist += np.linalg.norm(np_abundance[:, 0] - np_abundance[:, 1])  
                 
-                self.df_mrs.loc[self.li_new_sample_name[idx], 'HealthyDistance'] = -healthy_dist / 8                                
+                # Calculate healthy distance for each new sample
+                self.df_mrs.loc[self.li_new_sample_name[idx], 'HealthyDistance'] = -healthy_dist / 8                  
+                
         except Exception as e:
             print(str(e))
             rv = False
@@ -735,14 +739,21 @@ class EgGutProAnalysis:
             df_abundance = df_abundance.drop_duplicates(['sample_name', 'ncbi_name'], keep='last')
                
             self.df_harmful = pd.DataFrame(columns = ["sample_name", "ncbi_name", "abundance", "abundance_mean"])
+            self.df_harmful_tot = pd.DataFrame(columns = ["sample_name", "ncbi_name", "abundance", "abundance_mean"])
 
             for i in range(len(self.li_new_sample_name)):
                 condition = (df_abundance.sample_name == self.li_new_sample_name[i])
                 df_new = df_abundance[condition].sort_values(by=['abundance_mean'], ascending=False).head(10)
                 self.df_harmful = pd.concat([self.df_harmful,df_new])
-
+                
+                df_tot = df_abundance[condition].sort_values(by=['abundance_mean'], ascending=False)
+                self.df_harmful_tot = pd.concat([self.df_harmful_tot,df_tot])
+                
             self.df_harmful = self.df_harmful.set_index(keys=['sample_name'], inplace=False, drop=True)           
             self.df_harmful.to_csv(self.path_harmful)   
+
+            self.df_harmful_tot = self.df_harmful_tot.set_index(keys=['sample_name'], inplace=False, drop=True)           
+            self.df_harmful_tot.to_csv(self.path_harmful_tot)   
             
         except Exception as e:
             print(str(e))
@@ -831,6 +842,7 @@ class EgGutProAnalysis:
             sys.exit()
     
         return rv, rvmsg       
+    
 ####################################
 # main
 ####################################
