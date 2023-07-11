@@ -673,7 +673,7 @@ class EgGutProAnalysis:
             sys.exit()
             
         return rv, rvmsg      
-
+    
     def HarmfulMicrobiome(self):
         """
         Save the list of Harmful Microbiome as an csv file.
@@ -695,8 +695,10 @@ class EgGutProAnalysis:
                     condition_ncbi = (self.df_dysbiosis.beta == 1) & (self.df_dysbiosis.ncbi_name == self.li_ncbi_name[j]) 
 
                     abundance = 0 
+                    abundance_mean = 0
                     for idx_dysbiosis, row_dysbiosis in self.df_dysbiosis[condition_ncbi].iterrows(): 
                         condition_exp = (self.df_exp.taxa == row_dysbiosis['microbiome'])
+                        condition_db = (self.df_db.taxa == row_dysbiosis['microbiome'])
                         
                         if len(self.df_exp[condition_exp]) > 0:
                             abundance += self.df_exp[condition_exp][self.li_new_sample_name[i]].values[0]
@@ -712,16 +714,36 @@ class EgGutProAnalysis:
                                 if len(self.df_exp[condition_sub]) > 0:
                                     abundance -= self.df_exp[condition_sub][self.li_new_sample_name[i]].values[0]   
                             
+                        
+                        if len(self.df_db[condition_db]) > 0:
+                            abundance_mean += self.df_db[condition_db].mean(axis=1, numeric_only=True).values[0]
                             
-                        json_abundance.append({"sample_name" : self.li_new_sample_name[i], "ncbi_name" : self.li_ncbi_name[j], "abundance" : abundance})
+                        li_micro_sub = []
+
+                        if pd.isna(row_dysbiosis['microbiome_subtract']) is False:
+                            li_micro_sub = row_dysbiosis['microbiome_subtract'].split('\n')
+
+                            for micro_sub in li_micro_sub:
+                                condition_sub = (self.df_db.taxa == micro_sub)
+
+                                if len(self.df_db[condition_sub]) > 0:
+                                    abundance_mean -= self.df_db[condition_sub].mean(axis=1, numeric_only=True).values[0]                           
+                        json_abundance.append({"sample_name" : self.li_new_sample_name[i], "ncbi_name" : self.li_ncbi_name[j], "abundance" : abundance, "abundance_mean" : abundance_mean})
 
             df_abundance = pd.DataFrame.from_dict(json_abundance)   
 
             df_abundance = df_abundance.drop_duplicates(['sample_name', 'ncbi_name'], keep='last')
+               
+            self.df_harmful = pd.DataFrame(columns = ["sample_name", "ncbi_name", "abundance", "abundance_mean"])
 
-            self.df_harmful = df_abundance.set_index(keys=['sample_name'], inplace=False, drop=True)           
-            self.df_harmful.to_csv(self.path_harmful)    
-    
+            for i in range(len(self.li_new_sample_name)):
+                condition = (df_abundance.sample_name == self.li_new_sample_name[i])
+                df_new = df_abundance[condition].sort_values(by=['abundance_mean'], ascending=False).head(10)
+                self.df_harmful = pd.concat([self.df_harmful,df_new])
+
+            self.df_harmful = self.df_harmful.set_index(keys=['sample_name'], inplace=False, drop=True)           
+            self.df_harmful.to_csv(self.path_harmful)   
+            
         except Exception as e:
             print(str(e))
             rv = False
@@ -729,8 +751,9 @@ class EgGutProAnalysis:
             print("Error has occurred in the HarmfulMicrobiome process")
             sys.exit()
     
-        return rv, rvmsg       
-
+        return rv, rvmsg  
+    
+    
     def BeneficialMicrobiome(self):
         """
         Save the list of Beneficial Microbiome as an csv file.
@@ -790,7 +813,14 @@ class EgGutProAnalysis:
 
             df_abundance = df_abundance.drop_duplicates(['sample_name', 'ncbi_name'], keep='last')
 
-            self.df_beneficial = df_abundance.set_index(keys=['sample_name'], inplace=False, drop=True)           
+            self.df_beneficial = pd.DataFrame(columns = ["sample_name", "ncbi_name", "abundance", "abundance_mean"])
+
+            for i in range(len(self.li_new_sample_name)):
+                condition = (df_abundance.sample_name == self.li_new_sample_name[i])
+                df_new = df_abundance[condition].sort_values(by=['abundance_mean'], ascending=False).head(10)
+                self.df_beneficial = pd.concat([self.df_beneficial,df_new])
+
+            self.df_beneficial = self.df_beneficial.set_index(keys=['sample_name'], inplace=False, drop=True)           
             self.df_beneficial.to_csv(self.path_beneficial)    
     
         except Exception as e:
