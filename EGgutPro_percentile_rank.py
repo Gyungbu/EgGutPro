@@ -382,11 +382,11 @@ class EgGutProAnalysis:
             for i in range(len(self.li_phenotype)):
                 self.df_percentile_rank.loc[self.df_percentile_rank[self.li_phenotype[i]]<=5, self.li_phenotype[i]] = 5.0
                 self.df_percentile_rank.loc[self.df_percentile_rank[self.li_phenotype[i]]>=95, self.li_phenotype[i]] = 95.0      
-                
-            #self.df_percentile_rank['TotalScore'] = (self.df_percentile_rank['Dysbiosis']*1.1 + self.df_percentile_rank['HealthyDistance']*1.1 + self.df_percentile_rank['Diversity']*0.8)/3
+
+            self.df_percentile_rank['GMHS'] = ((self.df_percentile_rank['Diversity']*2) + self.df_percentile_rank['DysbiosisBeneficial'] + (1.5*self.df_percentile_rank['DysbiosisHarmful']) + self.df_percentile_rank['HealthyDistance'])/5.5
             
-            #self.df_percentile_rank['TotalScore'] = self.df_percentile_rank['TotalScore'].astype(float).round(1)
-                        
+            self.df_percentile_rank['GMHS'] = self.df_percentile_rank['GMHS'].astype(float).round()
+                     
             # Replace missing values with the string 'None'    
             self.df_percentile_rank = self.df_percentile_rank.fillna('None')
 
@@ -844,12 +844,6 @@ class EgGutProAnalysis:
             sys.exit()
     
         return rv, rvmsg       
-
-
-    
-    
-    
-    
     
     def CalculateProbioRatio(self): 
         """
