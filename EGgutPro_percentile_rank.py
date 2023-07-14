@@ -680,9 +680,9 @@ class EgGutProAnalysis:
             
         return rv, rvmsg      
     
-    def HarmfulMicrobiome(self):
+    def CalculateHarmfulMicrobiomeAbundance(self):
         """
-        Save the list of Harmful Microbiome as an csv file.
+        Calculate specific harmful microbiome abundance and average harmful microbiome abundance.
 
         Returns:
         A tuple (success, message), where success is a boolean indicating whether the operation was successful,
@@ -767,9 +767,9 @@ class EgGutProAnalysis:
         return rv, rvmsg  
     
     
-    def BeneficialMicrobiome(self):
+    def CalculateBeneficialMicrobiomeAbundance(self):
         """
-        Save the list of Beneficial Microbiome as an csv file.
+        Calculate specific beneficial microbiome abundance and average beneficial microbiome abundance.
 
         Returns:
         A tuple (success, message), where success is a boolean indicating whether the operation was successful,
@@ -845,9 +845,9 @@ class EgGutProAnalysis:
     
         return rv, rvmsg       
     
-    def CalculateProbioRatio(self): 
+    def CalculateTotalProbioRatio(self): 
         """
-        Calculate the Beneficial Probio Ratio. 
+        Calculate total probiotic abundance and average probiotic abundance.
 
         Returns:
         A tuple (success, message), where success is a boolean indicating whether the operation was successful,
@@ -899,9 +899,9 @@ class EgGutProAnalysis:
             
         return rv, rvmsg  
     
-    def Probio(self):
+    def CalculateSpecificProbioRatio(self):
         """
-        Save the list of Probio as an csv file.
+        Calculate specific probiotic abundance.
 
         Returns:
         A tuple (success, message), where success is a boolean indicating whether the operation was successful,
@@ -945,6 +945,7 @@ class EgGutProAnalysis:
             sys.exit()
     
         return rv, rvmsg     
+    
 ####################################
 # main
 ####################################
@@ -960,10 +961,10 @@ if __name__ == '__main__':
     eggutanalysis.EvaluatePercentileRank()    
     eggutanalysis.CalculateMicrobiomeRatio()
     eggutanalysis.CalculateAverageMicrobiomeRatio()
-    eggutanalysis.HarmfulMicrobiome()
-    eggutanalysis.BeneficialMicrobiome()
-    eggutanalysis.CalculateProbioRatio()
-    eggutanalysis.Probio()    
+    eggutanalysis.CalculateHarmfulMicrobiomeAbundance()
+    eggutanalysis.CalculateBeneficialMicrobiomeAbundance()
+    eggutanalysis.CalculateTotalProbioRatio()
+    eggutanalysis.CalculateSpecificProbioRatio()    
     
     print('Analysis Complete')
     
