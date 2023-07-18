@@ -238,7 +238,7 @@ class EgGutProUpdateMRS:
                         mrs += row_beta['beta'] * math.log10(100*abundance + 1) 
 
                     mrs /= len(self.df_beta[condition_phen])       
-                    self.df_mrs.loc[self.li_new_sample_name[i], self.li_phenotype[j]] = -mrs
+                    self.df_mrs.loc[self.li_new_sample_name[i], self.li_phenotype[j]] = mrs
 
         except Exception as e:
             print(str(e))
@@ -310,7 +310,7 @@ class EgGutProUpdateMRS:
                                         
                             dysbiosis_beneficial -= math.log10(100*abundance + 1)      
                             
-                self.df_mrs.loc[self.li_new_sample_name[i], 'DysbiosisHarmful'] = -dysbiosis_harmful
+                self.df_mrs.loc[self.li_new_sample_name[i], 'DysbiosisHarmful'] = dysbiosis_harmful
                 self.df_mrs.loc[self.li_new_sample_name[i], 'DysbiosisBeneficial'] = -dysbiosis_beneficial
                          
         except Exception as e:

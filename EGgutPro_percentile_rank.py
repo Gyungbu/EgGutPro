@@ -78,11 +78,9 @@ class EgGutProAnalysis:
         self.path_harmful_tot = f"{curdir}/output/EGgutPro_harmful_tot.csv"
         self.path_probio_tot = f"{curdir}/output/EGgutPro_probio_tot.csv"
 
-        ##ReadDB  에서 읽어들인데이타
         self.df_beta = None
         self.df_dysbiosis = None
-        self.df_probio = None
-                
+        self.df_probio = None             
         self.df_healthy = None
         self.df_exp = None
         self.df_mrs_db = None
@@ -216,7 +214,7 @@ class EgGutProAnalysis:
                         mrs += row_beta['beta'] * math.log10(100*abundance + 1) 
 
                     mrs /= len(self.df_beta[condition_phen])       
-                    self.df_mrs.loc[self.li_new_sample_name[i], self.li_phenotype[j]] = -mrs
+                    self.df_mrs.loc[self.li_new_sample_name[i], self.li_phenotype[j]] = mrs
 
         except Exception as e:
             print(str(e))
@@ -287,7 +285,7 @@ class EgGutProAnalysis:
                                         
                             dysbiosis_beneficial -= math.log10(100*abundance + 1)      
                             
-                self.df_mrs.loc[self.li_new_sample_name[i], 'DysbiosisHarmful'] = -dysbiosis_harmful
+                self.df_mrs.loc[self.li_new_sample_name[i], 'DysbiosisHarmful'] = dysbiosis_harmful
                 self.df_mrs.loc[self.li_new_sample_name[i], 'DysbiosisBeneficial'] = -dysbiosis_beneficial
                          
         except Exception as e:
@@ -487,7 +485,8 @@ class EgGutProAnalysis:
         rv = True
         rvmsg = "Success"
         
-        try:                  
+        try:     
+            '''
             # Define the conditions and corresponding values
             conditions = [
                 self.df_percentile_rank > 90,
@@ -502,8 +501,46 @@ class EgGutProAnalysis:
             self.df_eval = pd.DataFrame(np.select(conditions, values),
                                         index=self.df_percentile_rank.index,
                                         columns=self.df_percentile_rank.columns)
+            
             self.df_eval = self.df_eval.iloc[:, :-1]
-
+            '''
+            
+            
+            self.df_eval = pd.DataFrame(index=self.df_percentile_rank.index)
+            
+            li_positive_var = ['Diversity', 'DysbiosisBeneficial', 'HealthyDistance']
+            
+            for col in self.df_percentile_rank:
+                if col in li_positive_var:
+                    # Define the positive conditions and corresponding values
+                    conditions = [
+                        self.df_percentile_rank[col] > 90,
+                        (self.df_percentile_rank[col] > 70) & (self.df_percentile_rank[col] <= 90),
+                        (self.df_percentile_rank[col] > 50) & (self.df_percentile_rank[col] <= 70),
+                        (self.df_percentile_rank[col] > 30) & (self.df_percentile_rank[col] <= 50),
+                        self.df_percentile_rank[col] <= 30
+                    ]
+                    values = [1, 2, 3, 4, 5]     
+                    
+                    self.df_eval[col] = np.select(conditions, values)  
+                    
+                else:
+                    # Define the negative conditions and corresponding values
+                    conditions = [
+                        self.df_percentile_rank[col] <= 30,
+                        (self.df_percentile_rank[col] > 30) & (self.df_percentile_rank[col] <= 50),
+                        (self.df_percentile_rank[col] > 50) & (self.df_percentile_rank[col] <= 70),
+                        (self.df_percentile_rank[col] > 70) & (self.df_percentile_rank[col] <= 90),
+                        self.df_percentile_rank[col] > 90
+                    ]     
+                    
+                    values = [1, 2, 3, 4, 5]   
+                    
+                    self.df_eval[col] = np.select(conditions, values)    
+                    
+            self.df_eval = self.df_eval.iloc[:, :-1]
+            
+            
             '''
             # Type E, B, I, D
             conditions = [
@@ -688,6 +725,9 @@ class EgGutProAnalysis:
         A tuple (success, message), where success is a boolean indicating whether the operation was successful,
         and message is a string containing a success or error message.
         """  
+        myNAME = self.__class__.__name__+"::"+sys._getframe().f_code.co_name
+        WriteLog(myNAME, "In", type='INFO', fplog=self.__fplog)
+        
         rv = True
         rvmsg = "Success"
         
@@ -775,6 +815,9 @@ class EgGutProAnalysis:
         A tuple (success, message), where success is a boolean indicating whether the operation was successful,
         and message is a string containing a success or error message.
         """  
+        myNAME = self.__class__.__name__+"::"+sys._getframe().f_code.co_name
+        WriteLog(myNAME, "In", type='INFO', fplog=self.__fplog)
+        
         rv = True
         rvmsg = "Success"
         
