@@ -485,30 +485,10 @@ class EgGutProAnalysis:
         rv = True
         rvmsg = "Success"
         
-        try:     
-            '''
-            # Define the conditions and corresponding values
-            conditions = [
-                self.df_percentile_rank > 90,
-                (self.df_percentile_rank > 70) & (self.df_percentile_rank <= 90),
-                (self.df_percentile_rank > 50) & (self.df_percentile_rank <= 70),
-                (self.df_percentile_rank > 30) & (self.df_percentile_rank <= 50),
-                self.df_percentile_rank <= 30
-            ]
-            values = [1, 2, 3, 4, 5]
-
-            # Apply the conditions and values using np.select()
-            self.df_eval = pd.DataFrame(np.select(conditions, values),
-                                        index=self.df_percentile_rank.index,
-                                        columns=self.df_percentile_rank.columns)
-            
-            self.df_eval = self.df_eval.iloc[:, :-1]
-            '''
-            
-            
+        try:                 
             self.df_eval = pd.DataFrame(index=self.df_percentile_rank.index)
             
-            li_positive_var = ['Diversity', 'DysbiosisBeneficial', 'HealthyDistance']
+            li_positive_var = ['Diversity', 'DysbiosisBeneficial', 'HealthyDistance', 'GMHS']
             
             for col in self.df_percentile_rank:
                 if col in li_positive_var:
@@ -520,7 +500,7 @@ class EgGutProAnalysis:
                         (self.df_percentile_rank[col] > 30) & (self.df_percentile_rank[col] <= 50),
                         self.df_percentile_rank[col] <= 30
                     ]
-                    values = [1, 2, 3, 4, 5]     
+                    values = ['좋음', '보통', '주의', '나쁨', '아주 나쁨']     
                     
                     self.df_eval[col] = np.select(conditions, values)  
                     
@@ -534,11 +514,11 @@ class EgGutProAnalysis:
                         self.df_percentile_rank[col] > 90
                     ]     
                     
-                    values = [1, 2, 3, 4, 5]   
+                    values = ['좋음', '보통', '주의', '나쁨', '아주 나쁨']   
                     
                     self.df_eval[col] = np.select(conditions, values)    
                     
-            self.df_eval = self.df_eval.iloc[:, :-1]
+            #self.df_eval = self.df_eval.iloc[:, :-1]
             
             
             '''
