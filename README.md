@@ -1,4 +1,4 @@
-# EgGutPro : Calculate the index and percentile ranks of gut microbiome.
+# EgGutPro : Calculate the index and percentile ranks of human - gut microbiome.
 
 ![Python](https://img.shields.io/badge/Python-v3.9.0-blue.svg?style=flat&logo=python)&nbsp;
 ![Pandas](https://img.shields.io/badge/pandas-v2.0.1-blue.svg?style=flat&logo=pandas)&nbsp;
@@ -46,7 +46,7 @@ When EGgutPro_update_mrs is executed as above, the file `EGgutPro_db_abundance.x
 And the file `EGgutPro_mrs_hist.png` will be created or modified in the `./EgGutPro/output/` folder.
 
 
-# EGgutPro_percentile_rank : Calculate the index and percentile ranks of gut microbiome.
+# EGgutPro_percentile_rank : Calculate the index and percentile ranks of human - gut microbiome.
 ## How to use
 
 ### 1. Prepare Input data
