@@ -399,78 +399,7 @@ class EgGutProAnalysis:
             sys.exit()
     
         return rv, rvmsg
-
-
-    def DrawScatterPlot(self):
-        """
-        Draw a scatter plot using the values of diversity, dysbiosis, and HealthyDistance
-
-        Returns:
-        A tuple (success, message), where success is a boolean indicating whether the operation was successful,
-        and message is a string containing a success or error message.
-        """          
-        myNAME = self.__class__.__name__+"::"+sys._getframe().f_code.co_name
-        WriteLog(myNAME, "In", type='INFO', fplog=self.__fplog)
-         
-        rv = True
-        rvmsg = "Success"
-        
-        try:  
-            '''
-            #create regplot
-            p = sns.regplot(data=self.df_percentile_rank_db, x=self.df_percentile_rank_db['Diversity'], y=(self.df_percentile_rank_db['Dysbiosis'] + self.df_percentile_rank_db['HealthyDistance'])/2)
-
-            #calculate slope and intercept of regression equation
-            slope, intercept, r, p, sterr = scipy.stats.linregress(x=p.get_lines()[0].get_xdata(),
-                                                                   y=p.get_lines()[0].get_ydata())
-
-            # generate x and y values for the line
-            x_vals = np.linspace(start=self.df_percentile_rank_db['Diversity'].min(), stop=self.df_percentile_rank_db['Diversity'].max(), num=100)
-            y_vals = intercept + slope * x_vals                   
-            '''
-            sns.scatterplot(x=self.df_percentile_rank_db['Diversity'], y=(self.df_percentile_rank_db['Dysbiosis'] + self.df_percentile_rank_db['HealthyDistance'])/2, hue = self.df_percentile_rank_db['TotalScore'] , data=self.df_percentile_rank_db)
-            
-            # add new points to the scatter plot
-            sns.scatterplot(x=self.df_percentile_rank['Diversity'], y=(self.df_percentile_rank['Dysbiosis'] + self.df_percentile_rank['HealthyDistance'])/2, data=self.df_percentile_rank, color='g')            
-            
-            #plt.plot(x_vals, y_vals, '--', color='lightgray', label=f'y = {slope:.2f}x + {intercept:.2f}')
-            plt.xlabel('DiversityScore')
-            plt.ylabel('avg(DysbiosisScore, HealthSimilarityScore)')
-            plt.legend()
-                                 
-            plt.axhline(y=60/1.1, xmin=0, xmax=1, color='red', linestyle='--')    
-            plt.axvline(x=60/0.8, ymin=0, ymax=1, color='red', linestyle='--')
-            
-            '''
-            E_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] >= 60/0.8) & ((self.df_percentile_rank_db['Dysbiosis'] + self.df_percentile_rank_db['HealthyDistance'])/2 >= 60/1.1)]
-            B_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] < 60/0.8) & ((self.df_percentile_rank_db['Dysbiosis'] + self.df_percentile_rank_db['HealthyDistance'])/2 >= 60/1.1)]
-            D_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] < 60/0.8) & ((self.df_percentile_rank_db['Dysbiosis'] + self.df_percentile_rank_db['HealthyDistance'])/2 < 60/1.1)]
-            I_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] >= 60/0.8) & ((self.df_percentile_rank_db['Dysbiosis'] + self.df_percentile_rank_db['HealthyDistance'])/2 < 60/1.1)]
-
-            E_percent = len(E_data) / len(self.df_percentile_rank_db) * 100
-            B_percent = len(B_data) / len(self.df_percentile_rank_db) * 100
-            D_percent = len(D_data) / len(self.df_percentile_rank_db) * 100
-            I_percent = len(I_data) / len(self.df_percentile_rank_db) * 100
-            
-            print(f"<{self.species}>")
-            print("Percentage of samples in E: ", E_percent, '%')
-            print("Percentage of samples in B: ", B_percent, '%') 
-            print("Percentage of samples in D: ", D_percent, '%')
-            print("Percentage of samples in I: ", I_percent, '%')  
-            '''
-            
-            # save the scatter plot
-            plt.savefig(self.path_scatterplot_output , dpi=300, bbox_inches='tight')          
-              
-        except Exception as e:
-            print(str(e))
-            rv = False
-            rvmsg = str(e)
-            print(f"Error has occurred in the {myNAME} process")    
-            sys.exit()
-    
-        return rv, rvmsg    
-    
+     
     def EvaluatePercentileRank(self):
         """
         Evaluate based on percentile rank value and Save the Evaluation data as an Csv file
@@ -488,51 +417,37 @@ class EgGutProAnalysis:
         try:                 
             self.df_eval = pd.DataFrame(index=self.df_percentile_rank.index)
             
-            li_positive_var = ['Diversity', 'DysbiosisBeneficial', 'HealthyDistance', 'GMHS']
+            li_positive_var = ['GMHS', 'Diversity', 'DysbiosisBeneficial', 'HealthyDistance']
             
             for col in self.df_percentile_rank:
                 if col in li_positive_var:
-                    # Define the positive conditions and corresponding values
+                    # Define the conditions and corresponding values
                     conditions = [
-                        self.df_percentile_rank[col] > 90,
-                        (self.df_percentile_rank[col] > 70) & (self.df_percentile_rank[col] <= 90),
-                        (self.df_percentile_rank[col] > 50) & (self.df_percentile_rank[col] <= 70),
-                        (self.df_percentile_rank[col] > 30) & (self.df_percentile_rank[col] <= 50),
-                        self.df_percentile_rank[col] <= 30
+                        self.df_percentile_rank[col] >= 95,
+                        (self.df_percentile_rank[col] > 80) & (self.df_percentile_rank[col] <= 95),
+                        (self.df_percentile_rank[col] > 50) & (self.df_percentile_rank[col] <= 80),
+                        (self.df_percentile_rank[col] > 20) & (self.df_percentile_rank[col] <= 50),
+                        self.df_percentile_rank[col] <= 20
                     ]
+                    
                     values = ['좋음', '보통', '주의', '나쁨', '아주 나쁨']     
                     
                     self.df_eval[col] = np.select(conditions, values)  
-                    
-                else:
-                    # Define the negative conditions and corresponding values
+                                 
+                else: # MRS, DysbiosisHarmful
+                    # Define the conditions and corresponding values
                     conditions = [
-                        self.df_percentile_rank[col] <= 30,
-                        (self.df_percentile_rank[col] > 30) & (self.df_percentile_rank[col] <= 50),
-                        (self.df_percentile_rank[col] > 50) & (self.df_percentile_rank[col] <= 70),
-                        (self.df_percentile_rank[col] > 70) & (self.df_percentile_rank[col] <= 90),
-                        self.df_percentile_rank[col] > 90
+                        self.df_percentile_rank[col] >= 80,
+                        (self.df_percentile_rank[col] >= 50) & (self.df_percentile_rank[col] < 80),
+                        (self.df_percentile_rank[col] >= 20) & (self.df_percentile_rank[col] < 50),
+                        (self.df_percentile_rank[col] > 5) & (self.df_percentile_rank[col] < 20),
+                        self.df_percentile_rank[col] <= 5
                     ]     
                     
-                    values = ['좋음', '보통', '주의', '나쁨', '아주 나쁨']   
+                    values = ['아주 나쁨', '나쁨', '주의', '보통', '좋음']   
                     
-                    self.df_eval[col] = np.select(conditions, values)    
-                    
-            #self.df_eval = self.df_eval.iloc[:, :-1]
-            
-            
-            '''
-            # Type E, B, I, D
-            conditions = [
-                (self.df_percentile_rank['Diversity'] >= 60/0.8) & ((self.df_percentile_rank['Dysbiosis'] + self.df_percentile_rank['HealthyDistance'])/2 >= 60/1.1),
-                (self.df_percentile_rank['Diversity'] < 60/0.8) & ((self.df_percentile_rank['Dysbiosis'] + self.df_percentile_rank['HealthyDistance'])/2 >= 60/1.1),
-                (self.df_percentile_rank['Diversity'] >= 60/0.8) & ((self.df_percentile_rank['Dysbiosis'] + self.df_percentile_rank['HealthyDistance'])/2 < 60/1.1),
-                (self.df_percentile_rank['Diversity'] < 60/0.8) & ((self.df_percentile_rank['Dysbiosis'] + self.df_percentile_rank['HealthyDistance'])/2 < 60/1.1)
-            ]
-            values = ['E', 'B', 'I', 'D']
+                    self.df_eval[col] = np.select(conditions, values)                      
 
-            self.df_eval['Type'] = np.select(conditions, values)
-            '''
         except Exception as e:
             print(str(e))
             rv = False
@@ -980,7 +895,6 @@ if __name__ == '__main__':
     eggutanalysis.CalculateDysbiosis()    
     eggutanalysis.CalculateHealthyDistance()
     eggutanalysis.CalculatePercentileRank()
-    #eggutanalysis.DrawScatterPlot()    
     eggutanalysis.EvaluatePercentileRank()    
     eggutanalysis.CalculateMicrobiomeRatio()
     eggutanalysis.CalculateAverageMicrobiomeRatio()
