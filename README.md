@@ -55,16 +55,16 @@ Caveats:
 
 1. The first column of the Merged Proportion File is in the order of taxa, diversity, observed, and microbiome list.
 2. From the second column of the Merged Proportion File, the sample name, the diversity value of the sample, the number of species in the sample, and the relative abundance value of each microbiome should be listed in the order.
-3. In EGgutPro_percentile_rank.py, under if __name__ == '__main__': enter the path of the proportion file you want to analyze in the 'path_exp' value and save it.
+
 
 ### 2. Run EGgutPro_percentile_rank
 To run EGgutPro_percentile_rank,
  
 Run the command below:
 
-    python ./EgGutPro/EGgutPro_percentile_rank.py
+    python ./EgGutPro/EGgutPro_percentile_rank.py {path_exp}
+    ### ex) python EGgutPro_percentile_rank.py "/home/kbkim/EgGutPro/input/EGgutPro_one_sample.csv"
     
-
 When EGgutPro_percentile_rank is executed as above, the file `EGgutPro_eval.csv`, `EGgutPro_percentile_rank.csv`, `EGgutPro_harmful.csv`, `EGgutPro_harmful_tot.csv`, `EGgutPro_beneficial.csv` and `EGgutPro_probio_tot.csv` will be created or modified in the `./EgGutPro/output/` folder.
 
 
