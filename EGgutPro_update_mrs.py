@@ -70,26 +70,33 @@ class EgGutProUpdateMRS:
         Parameters:
         path_exp (str): Path of Merged Proportion file to analyze.  
         """   
-        
-        self.path_exp = path_exp
+                
         self.__fplog=fplog
         
+        ## Path of Reference files
         curdir = os.path.abspath('')
+        self.path_exp = path_exp
         self.path_ref = f"{curdir}/input/EGgutPro_mircobe_list.xlsx"
         self.path_healthy = f"{curdir}/input/EGgutPro_healthy_person_profile_v2.xlsx"
+        
+        ## Path of output files
         self.path_db = f"{curdir}/input/EGgutPro_db_abundance.xlsx"
         self.path_mrs_db = f"{curdir}/input/EGgutPro_mrs_db.xlsx"
         self.path_hist = f"{curdir}/output/EGgutPro_mrs_hist.png"
         self.path_percentile_rank_db = f"{curdir}/input/EGgutPro_percentile_rank_db.csv"
 
+        ## Dataframe of Reference files
         self.df_beta = None
         self.df_db = None
         self.df_exp = None
-        self.df_mrs = None
-        self.df_db_rev = None
+        self.df_db_rev = None  
         self.df_dysbiosis = None
+        
+        ## Dataframe of output files to calculate
         self.df_percentile_rank = None
+        self.df_mrs = None
 
+        ## Lists used for calculation
         self.li_diversity = None
         self.li_new_sample_name = None
         self.li_phenotype = None

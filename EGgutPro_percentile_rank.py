@@ -63,13 +63,15 @@ class EgGutProAnalysis:
         self.path_exp = path_exp
         self.__fplog=fplog
 
+        ## Path of Reference files
         curdir = os.path.dirname(os.path.abspath(__file__))
         self.path_ref = f"{curdir}/input/EGgutPro_mircobe_list.xlsx"       
         self.path_healthy = f"{curdir}/input/EGgutPro_healthy_person_profile_v2.xlsx"
         self.path_mrs_db = f"{curdir}/input/EGgutPro_mrs_db.xlsx"
         self.path_percentile_rank_db = f"{curdir}/input/EGgutPro_percentile_rank_db.csv"
         self.path_db = f"{curdir}/input/EGgutPro_db_abundance.xlsx"
-               
+        
+        ## Path of output files       
         self.path_percentile_rank_output = f"{curdir}/output/EGgutPro_percentile_rank.csv"
         self.path_eval_output = f"{curdir}/output/EGgutPro_eval.csv"
         self.path_scatterplot_output = f"{curdir}/output/EGgutPro_scatterplot.png"
@@ -78,6 +80,7 @@ class EgGutProAnalysis:
         self.path_harmful_tot = f"{curdir}/output/EGgutPro_harmful_tot.csv"
         self.path_probio_tot = f"{curdir}/output/EGgutPro_probio_tot.csv"
 
+        ## Dataframe of Reference files
         self.df_beta = None
         self.df_dysbiosis = None
         self.df_probio = None             
@@ -87,6 +90,7 @@ class EgGutProAnalysis:
         self.df_percentile_rank_db = None
         self.df_db = None
         
+        ## Dataframe of output files to calculate
         self.df_mrs = None
         self.df_percentile_rank = None
         self.df_eval = None
@@ -95,6 +99,7 @@ class EgGutProAnalysis:
         self.df_harmful_tot = None
         self.df_probio_tot = None
         
+        ## Lists used for calculation
         self.li_diversity = None
         self.li_observed = None
         self.li_new_sample_name = None
