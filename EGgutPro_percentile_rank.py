@@ -429,7 +429,7 @@ class EgGutProAnalysis:
                     # Define the conditions and corresponding values
                     conditions = [
                         self.df_percentile_rank[col] >= 95,
-                        (self.df_percentile_rank[col] > 80) & (self.df_percentile_rank[col] <= 95),
+                        (self.df_percentile_rank[col] > 80) & (self.df_percentile_rank[col] < 95),
                         (self.df_percentile_rank[col] > 50) & (self.df_percentile_rank[col] <= 80),
                         (self.df_percentile_rank[col] > 20) & (self.df_percentile_rank[col] <= 50),
                         self.df_percentile_rank[col] <= 20
