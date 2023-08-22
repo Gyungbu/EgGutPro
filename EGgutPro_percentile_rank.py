@@ -453,7 +453,7 @@ class EgGutProAnalysis:
                     values = ['좋음', '보통', '주의', '나쁨', '아주 나쁨']     
                     
                     self.df_eval[col] = np.select(conditions, values)  
-                                 
+                                                   
                 else: # MRS, DysbiosisHarmful
                     # Define the conditions and corresponding values
                     conditions = [
@@ -469,7 +469,21 @@ class EgGutProAnalysis:
                     self.df_eval[col] = np.select(conditions, values)    
                     
             self.df_eval = self.df_eval.loc[:,'DysbiosisHarmful':]
+            
+            # Type E, B, I, D
+            conditions = [
+                (self.df_percentile_rank['GMHS'] >= 0) & (self.df_percentile_rank['GMHS'] < 20),
+                
+                (self.df_percentile_rank['GMHS'] >= 20) & (self.df_percentile_rank['GMHS'] < 55),
+                
+                (self.df_percentile_rank['GMHS'] >= 55) & (self.df_percentile_rank['GMHS'] < 90),
+                
+                (self.df_percentile_rank['GMHS'] >= 90)
+            ]
+            values = ['D', 'B', 'I', 'E']
 
+            self.df_eval['Type'] = np.select(conditions, values)
+            
         except Exception as e:
             print(str(e))
             rv = False
