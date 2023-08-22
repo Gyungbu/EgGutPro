@@ -386,9 +386,24 @@ class EgGutProAnalysis:
                 self.df_percentile_rank.loc[self.df_percentile_rank[self.li_phenotype[i]]<=5, self.li_phenotype[i]] = 5.0
                 self.df_percentile_rank.loc[self.df_percentile_rank[self.li_phenotype[i]]>=95, self.li_phenotype[i]] = 95.0      
 
+            # Define a dictionary to map species to their specific category and corresponding phenotypes
+            species_specific_categories =  {
+                    '뇌 질환': ['알츠하이머', '이명', '불안장애', '불면증', '인지기능장애', '자폐증', '파킨슨병', '우울증'],
+                    '심혈관계 질환': ['고혈압', '심근경색', '동맥경화'],
+                    '간 질환': ['지방간', '간경변', '간염'],
+                    '소화기 질환': ['변비', '설사', '염증성장', '과민성장'],
+                    '대사 질환': ["비만", "당뇨", "혈당조절"],
+                    '자가면역 질환': ['아토피', '건선', '류머티스']
+                }
+            
+            # Main Category
+            for category, phenotypes in species_specific_categories.items():
+                self.df_percentile_rank[category] = self.df_percentile_rank[phenotypes].mean(axis=1)                
+                
             self.df_percentile_rank['GMHS'] = ((self.df_percentile_rank['Diversity']*2) + self.df_percentile_rank['DysbiosisBeneficial'] + (1.5*(100-self.df_percentile_rank['DysbiosisHarmful'])) + self.df_percentile_rank['HealthyDistance'])/5.5
             
-            self.df_percentile_rank['GMHS'] = self.df_percentile_rank['GMHS'].astype(float).round()
+            for col in self.df_percentile_rank:
+                self.df_percentile_rank[col] = self.df_percentile_rank[col].astype(float).round(1)
                      
             # Replace missing values with the string 'None'    
             self.df_percentile_rank = self.df_percentile_rank.fillna('None')
@@ -451,7 +466,9 @@ class EgGutProAnalysis:
                     
                     values = ['아주 나쁨', '나쁨', '주의', '보통', '좋음']   
                     
-                    self.df_eval[col] = np.select(conditions, values)                      
+                    self.df_eval[col] = np.select(conditions, values)    
+                    
+            self.df_eval = self.df_eval.loc[:,'DysbiosisHarmful':]
 
         except Exception as e:
             print(str(e))
