@@ -913,10 +913,10 @@ class EgGutProAnalysis:
                 
             self.df_probio_tot = self.df_probio_tot.set_index(keys=['sample_name'], inplace=False, drop=True)           
             self.df_probio_tot.to_csv(self.path_probio_tot)   
-            
+
             for i in range(len(self.li_new_sample_name)):
-                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_beneficial_microbiome'] = len(self.df_probio_tot.loc[self.df_probio_tot['abundance'] > 0]) 
-                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_harmful_microbiome'] = len(self.df_harmful_tot.loc[self.df_harmful_tot['abundance'] > 0]) 
+                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_beneficial_microbiome'] = len(self.df_probio_tot.loc[(self.df_probio_tot['abundance'] > 0) & (self.df_probio_tot.index == self.li_new_sample_name[i])]) 
+                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_harmful_microbiome'] = len(self.df_harmful_tot.loc[(self.df_harmful_tot['abundance'] > 0) & (self.df_harmful_tot.index == self.li_new_sample_name[i])]) 
             
             # Save the output file - df_eval
             self.df_eval.to_csv(self.path_eval_output, encoding="utf-8-sig", index_label='serial_number')   
