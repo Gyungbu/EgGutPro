@@ -891,8 +891,10 @@ class EgGutProAnalysis:
             for i in range(len(self.li_new_sample_name)):
                 for j in range(len(self.li_ncbi_name)):
                     
+                    condition_ncbi = (self.df_probio.ncbi_name == self.li_ncbi_name[j]) 
+                    
                     abundance = 0
-                    for idx_probio, row_probio in self.df_probio.iterrows(): 
+                    for idx_probio, row_probio in self.df_probio[condition_ncbi].iterrows(): 
                     
                         condition_probio = (self.df_exp.taxa == row_probio["microbiome"])
                         if (len(self.df_exp[condition_probio]) > 0):                        

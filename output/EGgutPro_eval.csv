@@ -1,2 +1,2 @@
 ﻿serial_number,DysbiosisHarmful,DysbiosisBeneficial,Diversity,HealthyDistance,뇌 질환,심혈관계 질환,간 질환,소화기 질환,대사 질환,자가면역 질환,GMHS,Type,harmful_abundance[%],beneficial_abundance[%],num_total_species,harmful_mean_abundance[%],beneficial_mean_abundance[%],probio_abundance[%],probio_abundance_mean[%],observed_mean,num_detected_beneficial_microbiome,num_detected_harmful_microbiome
-20230511_BC85,나쁨,아주 나쁨,나쁨,주의,나쁨,아주 나쁨,나쁨,나쁨,주의,주의,나쁨,B,9.555106499999999,66.3296258,164.0,10.824298046853146,63.830761803409096,0.056877000000000004,1.516107413111888,210,18.0,14.0
+20230511_BC85,나쁨,아주 나쁨,나쁨,주의,나쁨,아주 나쁨,나쁨,나쁨,주의,주의,나쁨,B,9.555106499999999,66.3296258,164.0,10.824298046853146,63.830761803409096,0.056877000000000004,1.516107413111888,210,6.0,14.0
