@@ -886,17 +886,21 @@ class EgGutProAnalysis:
         
         try:     
             json_probio_abundance = []
+            self.li_ncbi_name = list(dict.fromkeys(self.df_probio['ncbi_name']))
             
             for i in range(len(self.li_new_sample_name)):
-                for idx_probio, row_probio in self.df_probio.iterrows(): 
+                for j in range(len(self.li_ncbi_name)):
                     
                     abundance = 0
-                    condition_probio = (self.df_exp.taxa == row_probio["microbiome"])
-                    if (len(self.df_exp[condition_probio]) > 0):                        
-                        abundance = self.df_exp[condition_probio][self.li_new_sample_name[i]].values[0]
+                    for idx_probio, row_probio in self.df_probio.iterrows(): 
                     
-                    json_probio_abundance.append({"sample_name" : self.li_new_sample_name[i], "ncbi_name" : row_probio["ncbi_name"], "abundance" : abundance})
+                        condition_probio = (self.df_exp.taxa == row_probio["microbiome"])
+                        if (len(self.df_exp[condition_probio]) > 0):                        
+                            abundance += self.df_exp[condition_probio][self.li_new_sample_name[i]].values[0]
+                    
+                        json_probio_abundance.append({"sample_name" : self.li_new_sample_name[i], "ncbi_name" : row_probio["ncbi_name"], "abundance" : abundance})
             df_probio_abundance = pd.DataFrame.from_dict(json_probio_abundance)   
+            df_probio_abundance = df_probio_abundance.drop_duplicates(['sample_name', 'ncbi_name'], keep='last')
                            
             self.df_probio_tot = pd.DataFrame(columns = ["sample_name", "ncbi_name", "abundance"])
 
