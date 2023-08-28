@@ -450,7 +450,7 @@ class EgGutProAnalysis:
                         self.df_percentile_rank[col] <= 20
                     ]
                     
-                    values = ['좋음', '보통', '주의', '나쁨', '아주 나쁨']     
+                    values = ['G', 'N', 'W', 'B', 'VB']     
                     
                     self.df_eval[col] = np.select(conditions, values)  
                                                    
@@ -464,7 +464,7 @@ class EgGutProAnalysis:
                         self.df_percentile_rank[col] <= 5
                     ]     
                     
-                    values = ['아주 나쁨', '나쁨', '주의', '보통', '좋음']   
+                    values = ['VB', 'B', 'W', 'N', 'G']   
                     
                     self.df_eval[col] = np.select(conditions, values)    
                     
