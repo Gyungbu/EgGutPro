@@ -49,6 +49,36 @@ def filter_species(taxon_str_for_domain):
     species_name = splited_by_taxonomy[len(splited_by_taxonomy) - 1]  # 계문강목과속종 중 종만 필터링!!!
     return species_name
 
+def nogada_x_y_graph(type, xpos, ypos):
+    #print("GRAPH x: ", xpos, "y: ", ypos)
+    if (type == 'E'):
+        if (xpos < 82):  # E타입 x축 임계점이 81.몇임. 이거 이하로 넘어가면 I타입 되버려서.... 예외처리
+            xpos = 83
+
+    if (type == 'I'):
+        if (xpos < 54):
+            xpos = 54  # I타입 X값 최소
+        if (ypos < 54):
+            ypos = 54
+
+        if(xpos>75):
+            xpos=75
+        if(ypos>68):
+            ypos=68
+
+    if (type == 'B'):
+        if (xpos < 23):
+            xpos = 27
+        if (ypos < 27):
+            ypos = 33
+        if (xpos>48):
+            xpos=48
+        if(ypos>50):
+            ypos=50
+
+    return (xpos, ypos)
+
+
 ###################################
 # MainClass
 ###################################
@@ -422,7 +452,7 @@ class EgGutProAnalysis:
      
     def EvaluatePercentileRank(self):
         """
-        Evaluate based on percentile rank value and Save the Evaluation data as an Csv file
+        Evaluate based on percentile rank value 
 
         Returns:
         A tuple (success, message), where success is a boolean indicating whether the operation was successful,
@@ -492,7 +522,39 @@ class EgGutProAnalysis:
             sys.exit()
     
         return rv, rvmsg    
-       
+
+    def EvaluateBrainDiseaseException(self):
+        """
+        Evaluate Brain Disease for Exceptional Cases
+
+        Returns:
+        A tuple (success, message), where success is a boolean indicating whether the operation was successful,
+        and message is a string containing a success or error message.
+        """          
+        myNAME = self.__class__.__name__+"::"+sys._getframe().f_code.co_name
+        WriteLog(myNAME, "In", type='INFO', fplog=self.__fplog)
+         
+        rv = True
+        rvmsg = "Success"
+        
+        try:    
+            li_phenotype_brain = ['알츠하이머', '이명', '불안장애', '불면증', '인지기능장애', '자폐증', '파킨슨병', '우울증']
+            
+            for i in range(len(self.li_new_sample_name)):
+                for phenotype_brain in li_phenotype_brain:
+                    brain_score = self.df_percentile_rank.at[self.li_new_sample_name[i], phenotype_brain]
+                    if brain_score >= 80:
+                        self.df_eval.loc[self.li_new_sample_name[i], '뇌질환'] = 'VB'            
+            
+        except Exception as e:
+            print(str(e))
+            rv = False
+            rvmsg = str(e)
+            print(f"Error has occurred in the {myNAME} process")    
+            sys.exit()
+    
+        return rv, rvmsg      
+    
     def CalculateMicrobiomeRatio(self): 
         """
         Calculate the Beneficial Microbiome Ratio & Harmful Microbiome Ratio
@@ -917,6 +979,40 @@ class EgGutProAnalysis:
             for i in range(len(self.li_new_sample_name)):
                 self.df_eval.loc[self.li_new_sample_name[i],'num_detected_beneficial_microbiome'] = len(self.df_probio_tot.loc[(self.df_probio_tot['abundance'] > 0) & (self.df_probio_tot.index == self.li_new_sample_name[i])]) 
                 self.df_eval.loc[self.li_new_sample_name[i],'num_detected_harmful_microbiome'] = len(self.df_harmful_tot.loc[(self.df_harmful_tot['abundance'] > 0) & (self.df_harmful_tot.index == self.li_new_sample_name[i])]) 
+                
+        except Exception as e:
+            print(str(e))
+            rv = False
+            rvmsg = str(e)
+            print(f"Error has occurred in the {myNAME} process")
+            sys.exit()
+    
+        return rv, rvmsg     
+
+    def CalculateCoordinateLocation(self):
+        """
+        Calculate the Coordinate Location.
+
+        Returns:
+        A tuple (success, message), where success is a boolean indicating whether the operation was successful,
+        and message is a string containing a success or error message.
+        """  
+        myNAME = self.__class__.__name__+"::"+sys._getframe().f_code.co_name
+        WriteLog(myNAME, "In", type='INFO', fplog=self.__fplog)
+        
+        rv = True
+        rvmsg = "Success"
+        
+        try:    
+            for i in range(len(self.li_new_sample_name)):
+                GMHS_type = self.df_eval.at[self.li_new_sample_name[i], 'Type']
+                xpos = self.df_percentile_rank.at[self.li_new_sample_name[i], 'GMHS']
+                ypos = xpos
+
+                xpos_cal, ypos_cal = nogada_x_y_graph(GMHS_type, xpos, ypos)
+                
+                self.df_eval.loc[self.li_new_sample_name[i], 'Xpos'] = xpos_cal            
+                self.df_eval.loc[self.li_new_sample_name[i], 'Ypos'] = ypos_cal                    
             
             # Save the output file - df_eval
             self.df_eval.to_csv(self.path_eval_output, encoding="utf-8-sig", index_label='serial_number')   
@@ -928,8 +1024,8 @@ class EgGutProAnalysis:
             print(f"Error has occurred in the {myNAME} process")
             sys.exit()
     
-        return rv, rvmsg     
-    
+        return rv, rvmsg         
+
 ####################################
 # main
 ####################################
@@ -942,13 +1038,15 @@ if __name__ == '__main__':
     eggutanalysis.CalculateHealthyDistance()
     eggutanalysis.CalculatePercentileRank()
     eggutanalysis.EvaluatePercentileRank()    
+    eggutanalysis.EvaluateBrainDiseaseException()        
     eggutanalysis.CalculateMicrobiomeRatio()
     eggutanalysis.CalculateAverageMicrobiomeRatio()
     eggutanalysis.CalculateHarmfulMicrobiomeAbundance()
     eggutanalysis.CalculateBeneficialMicrobiomeAbundance()
     eggutanalysis.CalculateTotalProbioRatio()
-    eggutanalysis.CalculateSpecificProbioRatio()    
-    
+    eggutanalysis.CalculateSpecificProbioRatio()   
+    eggutanalysis.CalculateCoordinateLocation() 
+        
     print('Analysis Complete')
     
     
