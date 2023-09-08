@@ -105,10 +105,10 @@ class EgGutProAnalysis:
         self.path_percentile_rank_output = f"{curdir}/output/EGgutPro_percentile_rank.csv"
         self.path_eval_output = f"{curdir}/output/EGgutPro_eval.csv"
         self.path_scatterplot_output = f"{curdir}/output/EGgutPro_scatterplot.png"
-        self.path_harmful = f"{curdir}/output/EGgutPro_harmful.csv"
-        self.path_beneficial = f"{curdir}/output/EGgutPro_beneficial.csv"
-        self.path_harmful_tot = f"{curdir}/output/EGgutPro_harmful_tot.csv"
-        self.path_probio_tot = f"{curdir}/output/EGgutPro_probio_tot.csv"
+        self.path_harmful = f"{curdir}/output/EGgutPro_harmful_10.csv"
+        self.path_beneficial = f"{curdir}/output/EGgutPro_beneficial_10.csv"
+        self.path_harmful_tot = f"{curdir}/output/EGgutPro_harmful_30.csv"
+        self.path_probio_tot = f"{curdir}/output/EGgutPro_probio_19.csv"
 
         ## Dataframe of Reference files
         self.df_beta = None
@@ -911,7 +911,9 @@ class EgGutProAnalysis:
                     abundance_mean = 0
 
                     if (len(self.df_exp[condition_micro]) > 0):      
-                        abundance += self.df_exp[condition_micro][self.li_new_sample_name[i]].values[0]    
+                        abundance += self.df_exp[condition_micro][self.li_new_sample_name[i]].values[0]  
+                        
+                    if (len(self.df_db[condition_micro_db]) > 0):                        
                         abundance_mean += self.df_db[condition_micro_db].mean(axis=1, numeric_only=True).values[0]    
 
 
