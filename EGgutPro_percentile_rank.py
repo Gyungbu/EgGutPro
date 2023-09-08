@@ -124,10 +124,10 @@ class EgGutProAnalysis:
         self.df_mrs = None
         self.df_percentile_rank = None
         self.df_eval = None
-        self.df_harmful = None
-        self.df_beneficial = None
-        self.df_harmful_tot = None
-        self.df_probio_tot = None
+        self.df_harmful_10 = None
+        self.df_beneficial_10 = None
+        self.df_harmful_30 = None
+        self.df_probio_19 = None
         
         ## Lists used for calculation
         self.li_diversity = None
@@ -773,22 +773,22 @@ class EgGutProAnalysis:
 
             df_abundance = df_abundance.drop_duplicates(['sample_name', 'ncbi_name'], keep='last')
                
-            self.df_harmful = pd.DataFrame(columns = ["sample_name", "ncbi_name", "abundance", "abundance_mean"])
-            self.df_harmful_tot = pd.DataFrame(columns = ["sample_name", "ncbi_name", "abundance", "abundance_mean"])
+            self.df_harmful_10 = pd.DataFrame(columns = ["sample_name", "ncbi_name", "abundance", "abundance_mean"])
+            self.df_harmful_30 = pd.DataFrame(columns = ["sample_name", "ncbi_name", "abundance", "abundance_mean"])
 
             for i in range(len(self.li_new_sample_name)):
                 condition = (df_abundance.sample_name == self.li_new_sample_name[i])
                 df_new = df_abundance[condition].sort_values(by=['abundance_mean'], ascending=False).head(10)
-                self.df_harmful = pd.concat([self.df_harmful,df_new])
+                self.df_harmful_10 = pd.concat([self.df_harmful_10,df_new])
                 
                 df_tot = df_abundance[condition].sort_values(by=['abundance_mean'], ascending=False)
-                self.df_harmful_tot = pd.concat([self.df_harmful_tot,df_tot])
+                self.df_harmful_30 = pd.concat([self.df_harmful_30,df_tot])
                 
-            self.df_harmful = self.df_harmful.set_index(keys=['sample_name'], inplace=False, drop=True)           
-            self.df_harmful.to_csv(self.path_harmful)   
+            self.df_harmful_10 = self.df_harmful_10.set_index(keys=['sample_name'], inplace=False, drop=True)           
+            self.df_harmful_10.to_csv(self.path_harmful)   
 
-            self.df_harmful_tot = self.df_harmful_tot.set_index(keys=['sample_name'], inplace=False, drop=True)           
-            self.df_harmful_tot.to_csv(self.path_harmful_tot)   
+            self.df_harmful_30 = self.df_harmful_30.set_index(keys=['sample_name'], inplace=False, drop=True)           
+            self.df_harmful_30.to_csv(self.path_harmful_tot)   
             
         except Exception as e:
             print(str(e))
@@ -862,15 +862,15 @@ class EgGutProAnalysis:
 
             df_abundance = df_abundance.drop_duplicates(['sample_name', 'ncbi_name'], keep='last')
 
-            self.df_beneficial = pd.DataFrame(columns = ["sample_name", "ncbi_name", "abundance", "abundance_mean"])
+            self.df_beneficial_10 = pd.DataFrame(columns = ["sample_name", "ncbi_name", "abundance", "abundance_mean"])
 
             for i in range(len(self.li_new_sample_name)):
                 condition = (df_abundance.sample_name == self.li_new_sample_name[i])
                 df_new = df_abundance[condition].sort_values(by=['abundance_mean'], ascending=False).head(10)
-                self.df_beneficial = pd.concat([self.df_beneficial,df_new])
+                self.df_beneficial_10 = pd.concat([self.df_beneficial_10,df_new])
 
-            self.df_beneficial = self.df_beneficial.set_index(keys=['sample_name'], inplace=False, drop=True)           
-            self.df_beneficial.to_csv(self.path_beneficial)    
+            self.df_beneficial_10 = self.df_beneficial_10.set_index(keys=['sample_name'], inplace=False, drop=True)           
+            self.df_beneficial_10.to_csv(self.path_beneficial)    
     
         except Exception as e:
             print(str(e))
@@ -968,19 +968,19 @@ class EgGutProAnalysis:
             df_probio_abundance = pd.DataFrame.from_dict(json_probio_abundance)   
             df_probio_abundance = df_probio_abundance.drop_duplicates(['sample_name', 'ncbi_name'], keep='last')
                            
-            self.df_probio_tot = pd.DataFrame(columns = ["sample_name", "ncbi_name", "abundance"])
+            self.df_probio_19 = pd.DataFrame(columns = ["sample_name", "ncbi_name", "abundance"])
 
             for i in range(len(self.li_new_sample_name)):
                 condition = (df_probio_abundance.sample_name == self.li_new_sample_name[i])           
                 df_tot = df_probio_abundance[condition].sort_values(by=['abundance'], ascending=False)
-                self.df_probio_tot = pd.concat([self.df_probio_tot,df_tot])
+                self.df_probio_19 = pd.concat([self.df_probio_19,df_tot])
                 
-            self.df_probio_tot = self.df_probio_tot.set_index(keys=['sample_name'], inplace=False, drop=True)           
-            self.df_probio_tot.to_csv(self.path_probio_tot)   
+            self.df_probio_19 = self.df_probio_19.set_index(keys=['sample_name'], inplace=False, drop=True)           
+            self.df_probio_19.to_csv(self.path_probio_tot)   
 
             for i in range(len(self.li_new_sample_name)):
-                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_beneficial_microbiome'] = len(self.df_probio_tot.loc[(self.df_probio_tot['abundance'] > 0) & (self.df_probio_tot.index == self.li_new_sample_name[i])]) 
-                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_harmful_microbiome'] = len(self.df_harmful_tot.loc[(self.df_harmful_tot['abundance'] > 0) & (self.df_harmful_tot.index == self.li_new_sample_name[i])]) 
+                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_beneficial_microbiome'] = len(self.df_probio_19.loc[(self.df_probio_19['abundance'] > 0) & (self.df_probio_19.index == self.li_new_sample_name[i])]) 
+                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_harmful_microbiome'] = len(self.df_harmful_30.loc[(self.df_harmful_30['abundance'] > 0) & (self.df_harmful_30.index == self.li_new_sample_name[i])]) 
                 
         except Exception as e:
             print(str(e))
