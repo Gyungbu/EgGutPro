@@ -99,13 +99,13 @@ class EgGutProAnalysis:
         
         
         ## Path of output files       
-        self.path_percentile_rank_output = f"{self.outdir}/output/EGgutPro_percentile_rank.csv"
-        self.path_eval_output = f"{self.outdir}/output/EGgutPro_eval.csv"
-        self.path_scatterplot_output = f"{self.outdir}/output/EGgutPro_scatterplot.png"
-        self.path_harmful = f"{self.outdir}/output/EGgutPro_harmful_10.csv"
-        self.path_beneficial = f"{self.outdir}/output/EGgutPro_beneficial_10.csv"
-        self.path_harmful_tot = f"{self.outdir}/output/EGgutPro_harmful_30.csv"
-        self.path_probio_tot = f"{self.outdir}/output/EGgutPro_probio_19.csv"
+        self.path_percentile_rank_output = f"{self.outdir}/EGgutPro_percentile_rank.csv"
+        self.path_eval_output = f"{self.outdir}/EGgutPro_eval.csv"
+        self.path_scatterplot_output = f"{self.outdir}/EGgutPro_scatterplot.png"
+        self.path_harmful = f"{self.outdir}/EGgutPro_harmful_10.csv"
+        self.path_beneficial = f"{self.outdir}/EGgutPro_beneficial_10.csv"
+        self.path_harmful_tot = f"{self.outdir}/EGgutPro_harmful_30.csv"
+        self.path_probio_tot = f"{self.outdir}/EGgutPro_probio_19.csv"
 
         ## Dataframe of Reference files
         self.df_beta = None
