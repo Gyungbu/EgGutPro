@@ -1013,6 +1013,40 @@ class EgGutProAnalysis:
                 
                 self.df_eval.loc[self.li_new_sample_name[i], 'Xpos'] = xpos_cal            
                 self.df_eval.loc[self.li_new_sample_name[i], 'Ypos'] = ypos_cal                    
+                       
+        except Exception as e:
+            print(str(e))
+            rv = False
+            rvmsg = str(e)
+            print(f"Error has occurred in the {myNAME} process")
+            sys.exit()
+    
+        return rv, rvmsg         
+
+    def DetectProteusMirabilis(self):
+        """
+        Detect the Proteus Mirabilis
+
+        Returns:
+        A tuple (success, message), where success is a boolean indicating whether the operation was successful,
+        and message is a string containing a success or error message.
+        """  
+        myNAME = self.__class__.__name__+"::"+sys._getframe().f_code.co_name
+        WriteLog(myNAME, "In", type='INFO', fplog=self.__fplog)
+        
+        rv = True
+        rvmsg = "Success"
+        
+        try:    
+            self.df_eval['Proteus_mirabilis'] = '불검출'
+            if 's__Proteus_mirabilis' in self.df_exp.taxa.to_list():
+                
+                for i in range(len(self.li_new_sample_name)):                           
+                    condition_proteus = (self.df_exp.taxa == 's__Proteus_mirabilis')               
+                    proteus_abundance = self.df_exp[condition_proteus][self.li_new_sample_name[i]].values[0]  
+                    if proteus_abundance > 0:
+                        self.df_eval.loc[self.li_new_sample_name[i], 'Proteus_mirabilis'] = '검출'
+               
             
             # Save the output file - df_eval
             self.df_eval.to_csv(self.path_eval_output, encoding="utf-8-sig", index_label='serial_number')   
@@ -1024,13 +1058,12 @@ class EgGutProAnalysis:
             print(f"Error has occurred in the {myNAME} process")
             sys.exit()
     
-        return rv, rvmsg         
-
-####################################
+        return rv, rvmsg  
+    
+#####################################
 # main
-####################################
+#####################################
 if __name__ == '__main__':
-
     #path_exp = "input/EGgutPro_mirror_output_3175.csv"
     
     path_exp = "input/EGgutPro_one_sample.csv"
@@ -1050,6 +1083,7 @@ if __name__ == '__main__':
     eggutanalysis.CalculateTotalProbioRatio()
     eggutanalysis.CalculateSpecificProbioRatio()   
     eggutanalysis.CalculateCoordinateLocation() 
+    eggutanalysis.DetectProteusMirabilis() 
         
     print('Analysis Complete')
     
