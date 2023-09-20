@@ -414,7 +414,7 @@ class EgGutProAnalysis:
                 self.df_percentile_rank.loc[self.df_percentile_rank[self.li_phenotype[i]]>=95, self.li_phenotype[i]] = 95.0      
 
             # Define a dictionary to map species to their specific category and corresponding phenotypes
-            species_specific_categories =  {
+            self.species_specific_categories =  {
                     '뇌질환': ['알츠하이머', '이명', '불안장애', '불면증', '인지기능장애', '자폐증', '파킨슨병', '우울증'],
                     '심혈관질환': ['고혈압', '심근경색', '동맥경화'],
                     '간질환': ['지방간', '간경변', '간염'],
@@ -424,7 +424,7 @@ class EgGutProAnalysis:
                 }
             
             # Main Category
-            for category, phenotypes in species_specific_categories.items():
+            for category, phenotypes in self.species_specific_categories.items():
                 self.df_percentile_rank[category] = self.df_percentile_rank[phenotypes].mean(axis=1)                
                 
             self.df_percentile_rank['GMHS'] = ((self.df_percentile_rank['Diversity']*2) + self.df_percentile_rank['DysbiosisBeneficial'] + (1.5*(100-self.df_percentile_rank['DysbiosisHarmful'])) + self.df_percentile_rank['HealthyDistance'])/5.5
@@ -534,7 +534,17 @@ class EgGutProAnalysis:
         rv = True
         rvmsg = "Success"
         
-        try:    
+        try:   
+            for i in range(len(self.li_new_sample_name)):
+            
+                for category, li_phenotypes in self.species_specific_categories.items():
+                    for phenotype in li_phenotypes:
+                        disease_score = self.df_percentile_rank.at[self.li_new_sample_name[i], phenotype]
+                        if disease_score >= 80:
+                            self.df_eval.loc[self.li_new_sample_name[i], category] = 'VB'                   
+                 
+            
+            '''
             li_phenotype_brain = ['알츠하이머', '이명', '불안장애', '불면증', '인지기능장애', '자폐증', '파킨슨병', '우울증']
             
             for i in range(len(self.li_new_sample_name)):
@@ -542,7 +552,7 @@ class EgGutProAnalysis:
                     brain_score = self.df_percentile_rank.at[self.li_new_sample_name[i], phenotype_brain]
                     if brain_score >= 80:
                         self.df_eval.loc[self.li_new_sample_name[i], '뇌질환'] = 'VB'            
-            
+            '''
         except Exception as e:
             print(str(e))
             rv = False
