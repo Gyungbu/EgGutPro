@@ -624,7 +624,7 @@ class EgGutProAnalysis:
                             
                 self.df_eval.loc[self.li_new_sample_name[i], 'harmful_abundance[%]'] = harmful_abundance * 100
                 self.df_eval.loc[self.li_new_sample_name[i], 'beneficial_abundance[%]'] = beneficial_abundance * 100
-                self.df_eval.loc[self.li_new_sample_name[i], 'num_total_species'] = self.li_observed[i]
+                self.df_eval.loc[self.li_new_sample_name[i], 'num_total_species'] = int(self.li_observed[i])
 
                               
         except Exception as e:
@@ -920,7 +920,7 @@ class EgGutProAnalysis:
                 self.df_eval.loc[self.li_new_sample_name[i], 'probio_abundance[%]'] = probio_abundance * 100
                 
             self.df_eval.loc[:,'probio_abundance_mean[%]'] = probio_abundance_mean * 100
-            self.df_eval.loc[:,'observed_mean'] = round(self.observed_mean)
+            self.df_eval.loc[:,'observed_mean'] = int(self.observed_mean)
                                    
         except Exception as e:
             print(str(e))
@@ -976,9 +976,9 @@ class EgGutProAnalysis:
             self.df_probio_19.to_csv(self.path_probio_tot)   
 
             for i in range(len(self.li_new_sample_name)):
-                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_beneficial_microbiome'] = len(self.df_probio_19.loc[(self.df_probio_19['abundance'] > 0) & (self.df_probio_19.index == self.li_new_sample_name[i])]) 
-                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_harmful_microbiome'] = len(self.df_harmful_30.loc[(self.df_harmful_30['abundance'] > 0) & (self.df_harmful_30.index == self.li_new_sample_name[i])]) 
-                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_probio'] = len(self.df_probio_19.loc[(self.df_probio_19['abundance'] > 0) & (self.df_probio_19.index == self.li_new_sample_name[i])]) 
+                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_beneficial_microbiome'] = int(len(self.df_probio_19.loc[(self.df_probio_19['abundance'] > 0) & (self.df_probio_19.index == self.li_new_sample_name[i])])) 
+                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_harmful_microbiome'] = int(len(self.df_harmful_30.loc[(self.df_harmful_30['abundance'] > 0) & (self.df_harmful_30.index == self.li_new_sample_name[i])])) 
+                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_probio'] = int(len(self.df_probio_19.loc[(self.df_probio_19['abundance'] > 0) & (self.df_probio_19.index == self.li_new_sample_name[i])])) 
                 
         except Exception as e:
             print(str(e))
