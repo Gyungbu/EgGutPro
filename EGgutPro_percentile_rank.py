@@ -520,9 +520,9 @@ class EgGutProAnalysis:
     
         return rv, rvmsg    
 
-    def EvaluateBrainDiseaseException(self):
+    def EvaluateDiseaseException(self):
         """
-        Evaluate Brain Disease for Exceptional Cases
+        Evaluate Diseases for Exceptional Cases
 
         Returns:
         A tuple (success, message), where success is a boolean indicating whether the operation was successful,
@@ -542,17 +542,7 @@ class EgGutProAnalysis:
                         disease_score = self.df_percentile_rank.at[self.li_new_sample_name[i], phenotype]
                         if disease_score >= 80:
                             self.df_eval.loc[self.li_new_sample_name[i], category] = 'VB'                   
-                 
-            
-            '''
-            li_phenotype_brain = ['알츠하이머', '이명', '불안장애', '불면증', '인지기능장애', '자폐증', '파킨슨병', '우울증']
-            
-            for i in range(len(self.li_new_sample_name)):
-                for phenotype_brain in li_phenotype_brain:
-                    brain_score = self.df_percentile_rank.at[self.li_new_sample_name[i], phenotype_brain]
-                    if brain_score >= 80:
-                        self.df_eval.loc[self.li_new_sample_name[i], '뇌질환'] = 'VB'            
-            '''
+
         except Exception as e:
             print(str(e))
             rv = False
@@ -1085,7 +1075,7 @@ if __name__ == '__main__':
     eggutanalysis.CalculateHealthyDistance()
     eggutanalysis.CalculatePercentileRank()
     eggutanalysis.EvaluatePercentileRank()    
-    eggutanalysis.EvaluateBrainDiseaseException()        
+    eggutanalysis.EvaluateDiseaseException()        
     eggutanalysis.CalculateMicrobiomeRatio()
     eggutanalysis.CalculateAverageMicrobiomeRatio()
     eggutanalysis.CalculateHarmfulMicrobiomeAbundance()
