@@ -136,6 +136,7 @@ class EgGutProAnalysis:
         self.li_probio_microbiome = None  
         
         self.observed_mean = None
+        self.threshold = 0.00005
 
     # Load the DB file
     # df_beta : Data frame of of Phenotype-Microbiome information
@@ -976,9 +977,8 @@ class EgGutProAnalysis:
             self.df_probio_19.to_csv(self.path_probio_tot)   
 
             for i in range(len(self.li_new_sample_name)):
-                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_beneficial_microbiome'] = int(len(self.df_probio_19.loc[(self.df_probio_19['abundance'] > 0) & (self.df_probio_19.index == self.li_new_sample_name[i])])) 
-                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_harmful_microbiome'] = int(len(self.df_harmful_30.loc[(self.df_harmful_30['abundance'] > 0) & (self.df_harmful_30.index == self.li_new_sample_name[i])])) 
-                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_probio'] = int(len(self.df_probio_19.loc[(self.df_probio_19['abundance'] > 0) & (self.df_probio_19.index == self.li_new_sample_name[i])])) 
+                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_harmful_microbiome'] = int(len(self.df_harmful_30.loc[(self.df_harmful_30['abundance'] > self.threshold) & (self.df_harmful_30.index == self.li_new_sample_name[i])])) 
+                self.df_eval.loc[self.li_new_sample_name[i],'num_detected_probio'] = int(len(self.df_probio_19.loc[(self.df_probio_19['abundance'] > self.threshold) & (self.df_probio_19.index == self.li_new_sample_name[i])])) 
                 
         except Exception as e:
             print(str(e))
