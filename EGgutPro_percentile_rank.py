@@ -154,9 +154,7 @@ class EgGutProAnalysis:
             self.df_probio = pd.read_excel(self.path_ref, sheet_name = f"probio_taxa")
             
             self.df_healthy = pd.read_excel(self.path_healthy, sheet_name="RA")
-            self.df_exp = pd.read_csv(self.path_exp)
             self.df_mrs_db = pd.read_excel(self.path_mrs_db, index_col=0) 
-            self.df_exp = pd.read_csv(self.path_exp)
             self.df_percentile_rank_db = pd.read_csv(self.path_percentile_rank_db)
             self.df_db = pd.read_excel(self.path_db)
 
@@ -175,6 +173,26 @@ class EgGutProAnalysis:
             self.df_healthy['Taxonomy'] = self.df_healthy['Taxonomy'].apply(filter_species)
             self.df_healthy['Taxonomy'] = self.df_healthy['Taxonomy'].str.replace(' ','_')
             self.df_healthy = self.df_healthy.rename(columns={'Taxonomy': 'taxa'})
+            
+            if self.path_exp.split(".")[-1] == 'txt':
+                
+                self.df_exp = pd.read_csv(self.path_exp, sep='\t', header=None)
+                sample_name = self.df_exp.iloc[0,0]
+                observed = self.df_exp.iloc[1,2]
+                diversity = self.df_exp.iloc[0,3]
+                
+                print(self.df_exp)
+                self.df_exp = self.df_exp.iloc[0:,[1,3]]              
+                self.df_exp.columns=["taxa", sample_name]
+                self.df_exp.loc[self.df_exp["taxa"] == 'observed', sample_name] = observed
+                self.df_exp.loc[self.df_exp["taxa"] == 'diversity', sample_name] = diversity
+                
+                print(self.df_exp)
+                
+            else:    
+                self.df_exp = pd.read_csv(self.path_exp)
+                
+                
             
             print(self.df_exp)
             # Delete the diversity, observed rows
@@ -411,17 +429,17 @@ class EgGutProAnalysis:
             # Outliers
             # Replace percentile ranks that are less than or equal to 5 with 5, and those that are greater than or equal to 95 with 95
             for i in range(len(self.li_phenotype)):
-                self.df_percentile_rank.loc[self.df_percentile_rank[self.li_phenotype[i]]<=5, self.li_phenotype[i]] = 5.0
-                self.df_percentile_rank.loc[self.df_percentile_rank[self.li_phenotype[i]]>=95, self.li_phenotype[i]] = 95.0      
+                self.df_percentile_rank.loc[self.df_percentile_rank[self.li_phenotype[i]]<=5, self.li_phenotype[i]] = 5
+                self.df_percentile_rank.loc[self.df_percentile_rank[self.li_phenotype[i]]>=95, self.li_phenotype[i]] = 95   
 
             # Define a dictionary to map species to their specific category and corresponding phenotypes
             self.species_specific_categories =  {
-                    '뇌질환': ['알츠하이머', '이명', '불안장애', '불면증', '인지기능장애', '자폐증', '파킨슨병', '우울증'],
-                    '심혈관질환': ['고혈압', '심근경색', '동맥경화'],
-                    '간질환': ['지방간', '간경변', '간염'],
-                    '소화기질환': ['변비', '설사', '염증성장', '과민성장'],
-                    '대사질환': ["비만", "당뇨", "혈당조절"],
-                    '자가면역질환': ['아토피', '건선', '류머티스']
+                    '뇌 질환': ['알츠하이머', '우울증', '파킨슨병', '불면증', '불안 & 공황장애', 'ADHD', '자폐 스펙트럼'],
+                    '심혈관 질환': ['고혈압', '동맥경화', '심근경색'],
+                    '장 질환': ['변비', '설사', '과민성 장증후군', '염증성 장질환'],
+                    '간 질환': ['지방간', '간염', '간경변'],
+                    '자가면역 질환': ["아토피 피부염", "건선", "류마티스 관절염"],
+                    '대사 질환': ['비만', '제 2형 당뇨병']
                 }
             
             # Main Category
@@ -431,7 +449,7 @@ class EgGutProAnalysis:
             self.df_percentile_rank['GMHS'] = ((self.df_percentile_rank['Diversity']*2) + self.df_percentile_rank['DysbiosisBeneficial'] + (1.5*(100-self.df_percentile_rank['DysbiosisHarmful'])) + self.df_percentile_rank['HealthyDistance'])/5.5
             
             for col in self.df_percentile_rank:
-                self.df_percentile_rank[col] = self.df_percentile_rank[col].astype(float).round(1)
+                self.df_percentile_rank[col] = int(self.df_percentile_rank[col])
                      
             # Replace missing values with the string 'None'    
             self.df_percentile_rank = self.df_percentile_rank.fillna('None')
@@ -1066,7 +1084,8 @@ class EgGutProAnalysis:
 if __name__ == '__main__':
     #path_exp = "input/EGgutPro_mirror_output_3175.csv"
     
-    path_exp = "input/EGgutPro_one_sample.csv"
+    #path_exp = "input/EGgutPro_one_sample.csv"
+    path_exp = "input/EGgutPro_sample_input.txt"
     
     eggutanalysis = EgGutProAnalysis(path_exp)
     eggutanalysis.ReadDB()
