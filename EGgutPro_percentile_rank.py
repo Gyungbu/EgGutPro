@@ -180,21 +180,17 @@ class EgGutProAnalysis:
                 sample_name = self.df_exp.iloc[0,0]
                 observed = self.df_exp.iloc[1,2]
                 diversity = self.df_exp.iloc[0,3]
-                
-                print(self.df_exp)
+                               
                 self.df_exp = self.df_exp.iloc[0:,[1,3]]              
                 self.df_exp.columns=["taxa", sample_name]
                 self.df_exp.loc[self.df_exp["taxa"] == 'observed', sample_name] = observed
                 self.df_exp.loc[self.df_exp["taxa"] == 'diversity', sample_name] = diversity
                 
-                print(self.df_exp)
-                
             else:    
                 self.df_exp = pd.read_csv(self.path_exp)
-                
-                
-            
+      
             print(self.df_exp)
+            
             # Delete the diversity, observed rows
             if (list(self.df_exp['taxa'][0:2]) == ['diversity', 'observed']) & (list(self.df_db['taxa'][0:2]) == ['diversity', 'observed']):
                 self.li_diversity = list(self.df_exp.iloc[0,1:]) # li_diversity : Alpha-Diversity list 
