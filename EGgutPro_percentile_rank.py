@@ -445,7 +445,7 @@ class EgGutProAnalysis:
             self.df_percentile_rank['GMHS'] = ((self.df_percentile_rank['Diversity']*2) + self.df_percentile_rank['DysbiosisBeneficial'] + (1.5*(100-self.df_percentile_rank['DysbiosisHarmful'])) + self.df_percentile_rank['HealthyDistance'])/5.5
             
             for col in self.df_percentile_rank:
-                self.df_percentile_rank[col] = int(self.df_percentile_rank[col])
+                self.df_percentile_rank[col] = self.df_percentile_rank[col].astype(float).round()
                      
             # Replace missing values with the string 'None'    
             self.df_percentile_rank = self.df_percentile_rank.fillna('None')
@@ -1078,8 +1078,7 @@ class EgGutProAnalysis:
 # main
 #####################################
 if __name__ == '__main__':
-    #path_exp = "input/EGgutPro_mirror_output_3175.csv"
-    
+    #path_exp = "input/EGgutPro_mirror_output_3175.csv"    
     #path_exp = "input/EGgutPro_one_sample.csv"
     path_exp = "input/EGgutPro_sample_input.txt"
     
