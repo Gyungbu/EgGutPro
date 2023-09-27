@@ -430,12 +430,12 @@ class EgGutProAnalysis:
 
             # Define a dictionary to map species to their specific category and corresponding phenotypes
             self.species_specific_categories =  {
-                    '뇌 질환': ['알츠하이머', '우울증', '파킨슨병', '불면증', '불안 & 공황장애', 'ADHD', '자폐 스펙트럼'],
-                    '심혈관 질환': ['고혈압', '동맥경화', '심근경색'],
-                    '장 질환': ['변비', '설사', '과민성 장증후군', '염증성 장질환'],
-                    '간 질환': ['지방간', '간염', '간경변'],
-                    '자가면역 질환': ["아토피 피부염", "건선", "류마티스 관절염"],
-                    '대사 질환': ['비만', '제 2형 당뇨병']
+                    '뇌질환': ['치매', '우울증', '파킨슨병', '불면증', '불안&공황장애', 'ADHD', '자폐 스펙트럼'],
+                    '심혈관질환': ['고혈압', '동맥경화', '심근경색'],
+                    '장질환': ['변비', '설사', '과민성 장증후군', '염증성 장질환'],
+                    '간질환': ['지방간', '간염', '간경변'],
+                    '자가면역질환': ["아토피 피부염", "건선", "류마티스 관절염"],
+                    '대사질환': ['비만', '제 2형 당뇨병']
                 }
             
             # Main Category
@@ -1078,6 +1078,7 @@ class EgGutProAnalysis:
 # main
 #####################################
 if __name__ == '__main__':
+    
     #path_exp = "input/EGgutPro_mirror_output_3175.csv"    
     #path_exp = "input/EGgutPro_one_sample.csv"
     path_exp = "input/EGgutPro_sample_input.txt"
