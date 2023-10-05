@@ -136,7 +136,7 @@ class EgGutProAnalysis:
         self.li_probio_microbiome = None  
         
         self.observed_mean = None
-        self.threshold = 0.00005
+        self.threshold = 0.00001
 
     # Load the DB file
     # df_beta : Data frame of of Phenotype-Microbiome information
@@ -514,13 +514,13 @@ class EgGutProAnalysis:
             
             # Type E, B, I, D
             conditions = [
-                (self.df_percentile_rank['GMHS'] >= 0) & (self.df_percentile_rank['GMHS'] < 20),
+                (self.df_percentile_rank['GMHS'] >= 0) & (self.df_percentile_rank['GMHS'] < 45),
                 
-                (self.df_percentile_rank['GMHS'] >= 20) & (self.df_percentile_rank['GMHS'] < 55),
+                (self.df_percentile_rank['GMHS'] >= 45) & (self.df_percentile_rank['GMHS'] < 60),
                 
-                (self.df_percentile_rank['GMHS'] >= 55) & (self.df_percentile_rank['GMHS'] < 90),
+                (self.df_percentile_rank['GMHS'] >= 60) & (self.df_percentile_rank['GMHS'] < 75),
                 
-                (self.df_percentile_rank['GMHS'] >= 90)
+                (self.df_percentile_rank['GMHS'] >= 75)
             ]
             values = ['D', 'B', 'I', 'E']
 
