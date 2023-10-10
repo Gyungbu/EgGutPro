@@ -186,9 +186,13 @@ class EgGutProAnalysis:
                 self.df_exp.loc[self.df_exp["taxa"] == 'observed', sample_name] = observed
                 self.df_exp.loc[self.df_exp["taxa"] == 'diversity', sample_name] = diversity
                 
-            else:    
-                self.df_exp = pd.read_csv(self.path_exp)
-      
+            else:                    
+                try:
+                    self.df_exp = pd.read_csv(self.path_exp)
+                
+                except:
+                    print("Check the proportion input file!")
+                    
             print(self.df_exp)
             
             # Delete the diversity, observed rows
@@ -199,7 +203,10 @@ class EgGutProAnalysis:
                 self.observed_mean = self.df_db[(self.df_db.taxa == "observed")].mean(axis=1, numeric_only=True).values[0]
                 self.df_exp = self.df_exp.iloc[2:,:]
                 self.df_db = self.df_db.iloc[2:,:]
-                            
+
+            else: 
+                print("Check the proportion input file!")
+                
             # li_new_sample_name : Sample name list 
             # li_phenotype : Phenotype list 
             self.li_new_sample_name = list(self.df_exp.columns)[1:]  
