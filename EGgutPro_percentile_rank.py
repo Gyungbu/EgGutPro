@@ -106,6 +106,7 @@ class EgGutProAnalysis:
         self.path_beneficial = f"{self.outdir}/EGgutPro_beneficial_10.csv"
         self.path_harmful_tot = f"{self.outdir}/EGgutPro_harmful_30.csv"
         self.path_probio_tot = f"{self.outdir}/EGgutPro_probio_19.csv"
+        self.path_eval_output_proumed = f"{self.outdir}/proumed_output.csv"
 
         ## Dataframe of Reference files
         self.df_beta = None
@@ -125,6 +126,7 @@ class EgGutProAnalysis:
         self.df_beneficial_10 = None
         self.df_harmful_30 = None
         self.df_probio_19 = None
+        self.df_proumed = None
         
         ## Lists used for calculation
         self.li_diversity = None
@@ -1080,6 +1082,49 @@ class EgGutProAnalysis:
             sys.exit()
     
         return rv, rvmsg  
+
+    def SaveProumedOutput(self):
+        """
+        Save the output file for PROUMED
+
+        Returns:
+        A tuple (success, message), where success is a boolean indicating whether the operation was successful,
+        and message is a string containing a success or error message.
+        """  
+        myNAME = self.__class__.__name__+"::"+sys._getframe().f_code.co_name
+        WriteLog(myNAME, "In", type='INFO', fplog=self.__fplog)
+        
+        rv = True
+        rvmsg = "Success"
+        
+        try:    
+            self.df_proumed = self.df_percentile_rank[['GMHS','고혈압', '제 2형 당뇨병', '심근경색', '동맥경화', '간경변', '비만']].copy()
+            
+            self.df_proumed.insert(0,'Type', self.df_eval['Type'])
+            
+            
+            self.df_proumed.rename(columns = {"serial_number": "Sample ID", 
+                                              "Type": "Intestinal environment type", 
+                                              "GMHS": "Intestinal environment score",  
+                                              "고혈압": "High blood pressure score",
+                                              "제 2형 당뇨병": "Diabetes score",
+                                              "심근경색": "Myocardial infarction score",
+                                              "동맥경화": "Arteriosclerosis score", 
+                                              "간경변": "Cirrhosis score", 
+                                              "비만": "Obesity score"}, inplace=True)
+            
+            
+            # Save the output file - df_proumed
+            self.df_proumed.to_csv(self.path_eval_output_proumed, encoding="utf-8-sig", index_label='Sample ID')   
+            
+        except Exception as e:
+            print(str(e))
+            rv = False
+            rvmsg = str(e)
+            print(f"Error has occurred in the {myNAME} process")
+            sys.exit()
+    
+        return rv, rvmsg 
     
 #####################################
 # main
@@ -1106,6 +1151,7 @@ if __name__ == '__main__':
     eggutanalysis.CalculateSpecificProbioRatio()   
     eggutanalysis.CalculateCoordinateLocation() 
     eggutanalysis.DetectProteusMirabilis() 
+    #eggutanalysis.SaveProumedOutput()
         
     print('Analysis Complete')
     
