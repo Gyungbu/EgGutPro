@@ -544,38 +544,7 @@ class EgGutProAnalysis:
     
         return rv, rvmsg    
 
-    def EvaluateDiseaseException(self):
-        """
-        Evaluate Diseases for Exceptional Cases
-
-        Returns:
-        A tuple (success, message), where success is a boolean indicating whether the operation was successful,
-        and message is a string containing a success or error message.
-        """          
-        myNAME = self.__class__.__name__+"::"+sys._getframe().f_code.co_name
-        WriteLog(myNAME, "In", type='INFO', fplog=self.__fplog)
-         
-        rv = True
-        rvmsg = "Success"
-        
-        try:   
-            for i in range(len(self.li_new_sample_name)):
-            
-                for category, li_phenotypes in self.species_specific_categories.items():
-                    for phenotype in li_phenotypes:
-                        disease_score = self.df_percentile_rank.at[self.li_new_sample_name[i], phenotype]
-                        if disease_score >= 80:
-                            self.df_eval.loc[self.li_new_sample_name[i], category] = 'VB'                   
-
-        except Exception as e:
-            print(str(e))
-            rv = False
-            rvmsg = str(e)
-            print(f"Error has occurred in the {myNAME} process")    
-            sys.exit()
-    
-        return rv, rvmsg      
-    
+      
     def CalculateMicrobiomeRatio(self): 
         """
         Calculate the Beneficial Microbiome Ratio & Harmful Microbiome Ratio
@@ -1141,8 +1110,7 @@ if __name__ == '__main__':
     eggutanalysis.CalculateDysbiosis()    
     eggutanalysis.CalculateHealthyDistance()
     eggutanalysis.CalculatePercentileRank()
-    eggutanalysis.EvaluatePercentileRank()    
-    eggutanalysis.EvaluateDiseaseException()        
+    eggutanalysis.EvaluatePercentileRank()           
     eggutanalysis.CalculateMicrobiomeRatio()
     eggutanalysis.CalculateAverageMicrobiomeRatio()
     eggutanalysis.CalculateHarmfulMicrobiomeAbundance()
