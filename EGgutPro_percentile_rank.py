@@ -38,35 +38,41 @@ def filter_species(taxon_str_for_domain):
     species_name = splited_by_taxonomy[len(splited_by_taxonomy) - 1]  # 계문강목과속종 중 종만 필터링!!!
     return species_name
 
-def nogada_x_y_graph(type, xpos, ypos):
+
+def nogada_x_y_graph_v2(final_type, xpos, ypos):
     #print("GRAPH x: ", xpos, "y: ", ypos)
-    if (type == 'E'):
-        if (xpos < 82):  # E타입 x축 임계점이 81.몇임. 이거 이하로 넘어가면 I타입 되버려서.... 예외처리
-            xpos = 83
 
-    if (type == 'I'):
-        if (xpos < 54):
-            xpos = 54  # I타입 X값 최소
-        if (ypos < 54):
-            ypos = 54
+    if (final_type == 'D'):
+        if (xpos < 8):
+            xpos = 8
+        if( ypos<8 ):
+            ypos = 8
+        if(xpos >30):
+            xpos = 30
+        if(ypos >30):
+            ypos = 27
 
-        if(xpos>75):
-            xpos=75
-        if(ypos>68):
-            ypos=68
+    if (final_type == 'B'):
+        if (xpos > 45):
+            xpos = 45
+        if (ypos > 50):
+            ypos = 50
 
-    if (type == 'B'):
-        if (xpos < 23):
-            xpos = 27
-        if (ypos < 27):
-            ypos = 33
-        if (xpos>48):
-            xpos=48
-        if(ypos>50):
-            ypos=50
+    if (final_type == 'I'):
+        if(xpos > 65):
+            xpos=65
+        if (ypos > 65):
+            ypos = 65
+
+
+    if (final_type == 'E'):
+        if(xpos>85):
+            xpos = 85
+             
+        if (ypos > 74):
+            ypos = 68
 
     return (xpos, ypos)
-
 
 ###################################
 # MainClass
@@ -1001,7 +1007,7 @@ class EgGutProAnalysis:
                 xpos = self.df_percentile_rank.at[self.li_new_sample_name[i], 'GMHS']
                 ypos = xpos
 
-                xpos_cal, ypos_cal = nogada_x_y_graph(GMHS_type, xpos, ypos)
+                xpos_cal, ypos_cal = nogada_x_y_graph_v2(GMHS_type, xpos, ypos)
                 
                 self.df_eval.loc[self.li_new_sample_name[i], 'Xpos'] = xpos_cal            
                 self.df_eval.loc[self.li_new_sample_name[i], 'Ypos'] = ypos_cal                    
