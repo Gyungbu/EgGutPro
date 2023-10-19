@@ -198,7 +198,7 @@ class EgGutProAnalysis:
                     self.df_exp.columns=["taxa", sample_name]
                     self.df_exp.loc[self.df_exp["taxa"] == 'observed', sample_name] = observed
                     self.df_exp.loc[self.df_exp["taxa"] == 'diversity', sample_name] = diversity
-                    
+                                       
                 else:
                     print("Check the proportion input file!")
                 
@@ -208,6 +208,10 @@ class EgGutProAnalysis:
                 
                 except:
                     print("Check the proportion input file!")
+            
+            # Delete CST type row if it exists - df_exp
+            if (self.df_exp['taxa']=='subCST').any():
+                self.df_exp.drop(self.df_exp[(self.df_exp['taxa'] == 'subCST')].index, inplace=True)
                     
             print(self.df_exp)
             

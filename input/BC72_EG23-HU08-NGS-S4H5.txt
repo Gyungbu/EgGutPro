@@ -1,5 +1,6 @@
 diversity	2.274958932041507
 observed	197
+subCST	NA
 c__Actinobacteria	0.018687392055267704
 c__Alphaproteobacteria	0.00024179620034542315
 c__Bacilli	0.036027633851468045
