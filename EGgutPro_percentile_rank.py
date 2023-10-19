@@ -183,16 +183,24 @@ class EgGutProAnalysis:
             self.df_healthy = self.df_healthy.rename(columns={'Taxonomy': 'taxa'})
             
             if self.path_exp.split(".")[-1] == 'txt':
-                
                 self.df_exp = pd.read_csv(self.path_exp, sep='\t', header=None)
-                sample_name = self.df_exp.iloc[0,0]
-                observed = self.df_exp.iloc[1,2]
-                diversity = self.df_exp.iloc[0,3]
-                               
-                self.df_exp = self.df_exp.iloc[0:,[1,3]]              
-                self.df_exp.columns=["taxa", sample_name]
-                self.df_exp.loc[self.df_exp["taxa"] == 'observed', sample_name] = observed
-                self.df_exp.loc[self.df_exp["taxa"] == 'diversity', sample_name] = diversity
+
+                if len(self.df_exp.columns) == 2:     
+                    sample_name = self.path_exp.split("_")[-1].split(".")[0]
+                    self.df_exp.columns=["taxa", sample_name]
+                
+                elif len(self.df_exp.columns) == 4:
+                    sample_name = self.df_exp.iloc[0,0]
+                    observed = self.df_exp.iloc[1,2]
+                    diversity = self.df_exp.iloc[0,3]
+
+                    self.df_exp = self.df_exp.iloc[0:,[1,3]]              
+                    self.df_exp.columns=["taxa", sample_name]
+                    self.df_exp.loc[self.df_exp["taxa"] == 'observed', sample_name] = observed
+                    self.df_exp.loc[self.df_exp["taxa"] == 'diversity', sample_name] = diversity
+                    
+                else:
+                    print("Check the proportion input file!")
                 
             else:                    
                 try:
@@ -1108,7 +1116,9 @@ if __name__ == '__main__':
     
     #path_exp = "input/EGgutPro_mirror_output_3175.csv"    
     #path_exp = "input/EGgutPro_one_sample.csv"
-    path_exp = "input/EGgutPro_sample_input.txt"
+    #path_exp = "input/EGgutPro_sample_input.txt"
+    path_exp = "input/BC72_EG23-HU08-NGS-S4H5.txt"
+
     
     eggutanalysis = EgGutProAnalysis(path_exp)
     eggutanalysis.ReadDB()
