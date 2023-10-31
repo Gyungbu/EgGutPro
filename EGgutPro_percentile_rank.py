@@ -74,6 +74,9 @@ def nogada_x_y_graph_v2(final_type, xpos, ypos):
 
     return (xpos, ypos)
 
+def starts_with_s(value):
+    return value.startswith('s__')
+
 ###################################
 # MainClass
 ###################################
@@ -394,7 +397,8 @@ class EgGutProAnalysis:
                 
                 df_exp_one = self.df_exp[['taxa', self.li_new_sample_name[idx]]]
                 df_exp_one = df_exp_one[df_exp_one[self.li_new_sample_name[idx]] != 0]
-                           
+                df_exp_one = df_exp_one[df_exp_one[['taxa']].applymap(starts_with_s).any(axis=1)]
+
                 for donor in self.df_healthy.iloc[:,1:].columns:
                     df_healthy_one = self.df_healthy[['taxa', donor]]
                     df_healthy_one = df_healthy_one[df_healthy_one[donor] != 0]

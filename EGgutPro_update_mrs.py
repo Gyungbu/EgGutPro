@@ -59,6 +59,9 @@ def filter_species(taxon_str_for_domain):
     species_name = splited_by_taxonomy[len(splited_by_taxonomy) - 1]  # 계문강목과속종 중 종만 필터링!!!
     return species_name
 
+def starts_with_s(value):
+    return value.startswith('s__')
+
 ###################################
 # MainClass
 ###################################
@@ -356,6 +359,7 @@ class EgGutProUpdateMRS:
                 for donor in self.df_healthy.iloc[:,1:].columns:
                     df_healthy_one = self.df_healthy[['taxa', donor]]
                     df_healthy_one = df_healthy_one[df_healthy_one[donor] != 0]
+                    df_exp_one = df_exp_one[df_exp_one[['taxa']].applymap(starts_with_s).any(axis=1)]
                                       
                     df_merged = pd.merge(df_exp_one, df_healthy_one, how='outer',on='taxa')
                     df_merged = df_merged.fillna(0)
