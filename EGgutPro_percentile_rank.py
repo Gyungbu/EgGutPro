@@ -364,7 +364,7 @@ class EgGutProAnalysis:
                             
                 self.df_mrs.loc[self.li_new_sample_name[i], 'DysbiosisHarmful'] = dysbiosis_harmful
                 self.df_mrs.loc[self.li_new_sample_name[i], 'DysbiosisBeneficial'] = -dysbiosis_beneficial
-                         
+                self.df_mrs.loc[self.li_new_sample_name[i], 'Dysbiosis'] = -dysbiosis_harmful-dysbiosis_beneficial                         
         except Exception as e:
             print(str(e))
             rv = False
@@ -444,7 +444,7 @@ class EgGutProAnalysis:
             self.df_mrs['Diversity'] = self.li_diversity
             
             # Append the Dysbiosis, HealthyDistance, Diversity, TotalRiskScore to phenotype list
-            self.li_phenotype += ['DysbiosisHarmful', 'DysbiosisBeneficial', 'Diversity', 'HealthyDistance']
+            self.li_phenotype += ['DysbiosisHarmful', 'DysbiosisBeneficial', 'Diversity', 'HealthyDistance', 'Dysbiosis']
 
             # Create an empty data frame with the same index and columns as the df_mrs data frame
             self.df_percentile_rank = pd.DataFrame(index = self.li_new_sample_name, columns = self.li_phenotype)
@@ -480,10 +480,7 @@ class EgGutProAnalysis:
                      
             # Replace missing values with the string 'None'    
             self.df_percentile_rank = self.df_percentile_rank.fillna('None')
-
-            # Save the output file - Percentile Rank of the samples
-            self.df_percentile_rank.to_csv(self.path_percentile_rank_output, encoding="utf-8-sig", index_label='serial_number')
-            
+                        
         except Exception as e:
             print(str(e))
             rv = False
@@ -545,17 +542,33 @@ class EgGutProAnalysis:
             
             # Type E, B, I, D
             conditions = [
-                (self.df_percentile_rank['GMHS'] >= 0) & (self.df_percentile_rank['GMHS'] < 45),
+                (self.df_percentile_rank['Diversity'] >= 60) & (self.df_percentile_rank['Dysbiosis'] >= 60),
                 
-                (self.df_percentile_rank['GMHS'] >= 45) & (self.df_percentile_rank['GMHS'] < 60),
+                (self.df_percentile_rank['Diversity'] < 60) & (self.df_percentile_rank['Dysbiosis'] >= 60),
                 
-                (self.df_percentile_rank['GMHS'] >= 60) & (self.df_percentile_rank['GMHS'] < 75),
+                (self.df_percentile_rank['Diversity'] >= 60) & (self.df_percentile_rank['Dysbiosis'] < 60),
                 
-                (self.df_percentile_rank['GMHS'] >= 75)
+                (self.df_percentile_rank['Diversity'] < 60) & (self.df_percentile_rank['Dysbiosis'] < 60)
             ]
-            values = ['D', 'B', 'I', 'E']
+            values = ['E', 'B', 'I', 'D']
 
             self.df_eval['Type'] = np.select(conditions, values)
+            
+            # Print the EBID percentages of the samples
+            E_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] >= 60) & (self.df_percentile_rank_db['Dysbiosis'] >= 60)]
+            B_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] < 60) & (self.df_percentile_rank_db['Dysbiosis'] >= 60)]
+            D_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] < 60) & (self.df_percentile_rank_db['Dysbiosis'] < 60)]
+            I_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] >= 60) & (self.df_percentile_rank_db['Dysbiosis'] < 60)]
+
+            E_percent = len(E_data) / len(self.df_percentile_rank_db) * 100
+            B_percent = len(B_data) / len(self.df_percentile_rank_db) * 100
+            D_percent = len(D_data) / len(self.df_percentile_rank_db) * 100
+            I_percent = len(I_data) / len(self.df_percentile_rank_db) * 100
+            
+            print("Percentage of samples in E: ", E_percent, '%')
+            print("Percentage of samples in B: ", B_percent, '%') 
+            print("Percentage of samples in D: ", D_percent, '%')
+            print("Percentage of samples in I: ", I_percent, '%')            
             
         except Exception as e:
             print(str(e))
@@ -1060,8 +1073,14 @@ class EgGutProAnalysis:
                     proteus_abundance = self.df_exp[condition_proteus][self.li_new_sample_name[i]].values[0]  
                     if proteus_abundance > 0:
                         self.df_eval.loc[self.li_new_sample_name[i], 'Proteus_mirabilis'] = '검출'
-               
+
+            # Delete the Dysbiosis column
+            self.df_percentile_rank = self.df_percentile_rank.drop('Dysbiosis', axis=1)
+            # Save the output file - Percentile Rank of the samples
+            self.df_percentile_rank.to_csv(self.path_percentile_rank_output, encoding="utf-8-sig", index_label='serial_number')
             
+            # Delete the Dysbiosis column
+            self.df_eval = self.df_eval.drop('Dysbiosis', axis=1)
             # Save the output file - df_eval
             self.df_eval.to_csv(self.path_eval_output, encoding="utf-8-sig", index_label='serial_number')   
             

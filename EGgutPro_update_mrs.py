@@ -145,9 +145,7 @@ class EgGutProUpdateMRS:
             self.df_healthy['Taxonomy'] = self.df_healthy['Taxonomy'].apply(filter_species)
             self.df_healthy['Taxonomy'] = self.df_healthy['Taxonomy'].str.replace(' ','_')
             self.df_healthy = self.df_healthy.rename(columns={'Taxonomy': 'taxa'})            
-            
-            print(self.df_healthy)
-            
+                        
         except Exception as e:
             print(str(e))
             rv = False
@@ -322,7 +320,7 @@ class EgGutProUpdateMRS:
                             
                 self.df_mrs.loc[self.li_new_sample_name[i], 'DysbiosisHarmful'] = dysbiosis_harmful
                 self.df_mrs.loc[self.li_new_sample_name[i], 'DysbiosisBeneficial'] = -dysbiosis_beneficial
-                         
+                self.df_mrs.loc[self.li_new_sample_name[i], 'Dysbiosis'] = -dysbiosis_harmful-dysbiosis_beneficial                            
         except Exception as e:
             print(str(e))
             rv = False
@@ -402,7 +400,7 @@ class EgGutProUpdateMRS:
             self.df_mrs['Diversity'] = self.li_diversity
             
             # Append the Dysbiosis, HealthyDistance, Diversity, TotalRiskScore to phenotype list
-            self.li_phenotype += ['DysbiosisHarmful', 'DysbiosisBeneficial', 'Diversity', 'HealthyDistance']
+            self.li_phenotype += ['DysbiosisHarmful', 'DysbiosisBeneficial', 'Diversity', 'HealthyDistance', 'Dysbiosis']
 
             # Create an empty data frame with the same index and columns as the df_mrs data frame
             self.df_percentile_rank = pd.DataFrame(index = self.li_new_sample_name, columns = self.li_phenotype)
@@ -416,11 +414,7 @@ class EgGutProUpdateMRS:
             for i in range(len(self.li_phenotype)):
                 self.df_percentile_rank.loc[self.df_percentile_rank[self.li_phenotype[i]]<=5, self.li_phenotype[i]] = 5
                 self.df_percentile_rank.loc[self.df_percentile_rank[self.li_phenotype[i]]>=95, self.li_phenotype[i]] = 95     
-                
-            #self.df_percentile_rank['TotalScore'] = (self.df_percentile_rank['Dysbiosis']*1.1 + self.df_percentile_rank['HealthyDistance']*1.1 + self.df_percentile_rank['Diversity']*0.8)/3
-            
-            #self.df_percentile_rank['TotalScore'] = self.df_percentile_rank['TotalScore'].astype(float).round(1)
-                       
+                                       
             # Replace missing values with the string 'None'    
             self.df_percentile_rank = self.df_percentile_rank.fillna('None')
             
