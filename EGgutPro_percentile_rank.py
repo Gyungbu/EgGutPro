@@ -554,6 +554,7 @@ class EgGutProAnalysis:
 
             self.df_eval['Type'] = np.select(conditions, values)
             
+            '''
             # Print the EBID percentages of the samples
             E_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] >= 60) & (self.df_percentile_rank_db['Dysbiosis'] >= 60)]
             B_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] < 60) & (self.df_percentile_rank_db['Dysbiosis'] >= 60)]
@@ -569,6 +570,7 @@ class EgGutProAnalysis:
             print("Percentage of samples in B: ", B_percent, '%') 
             print("Percentage of samples in D: ", D_percent, '%')
             print("Percentage of samples in I: ", I_percent, '%')            
+            '''
             
         except Exception as e:
             print(str(e))
