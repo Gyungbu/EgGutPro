@@ -94,7 +94,7 @@ class EgGutProAnalysis:
         ## Path of Reference files
         curdir = os.path.dirname(os.path.abspath(__file__))
         self.path_ref = f"{curdir}/input/EGgutPro_mircobe_list.xlsx"       
-        self.path_healthy = f"{curdir}/input/EGgutPro_healthy_person_profile_v2.xlsx"
+        self.path_healthy = f"{curdir}/input/20231127_FMTDonor_OnlySp.xlsx"
         self.path_mrs_db = f"{curdir}/input/EGgutPro_mrs_db.xlsx"
         self.path_percentile_rank_db = f"{curdir}/input/EGgutPro_percentile_rank_db.csv"
         self.path_db = f"{curdir}/input/EGgutPro_db_abundance.xlsx"
@@ -164,7 +164,7 @@ class EgGutProAnalysis:
             self.df_dysbiosis = pd.read_excel(self.path_ref, sheet_name = f"harmful_beneficial_taxa")
             self.df_probio = pd.read_excel(self.path_ref, sheet_name = f"probio_taxa")
             
-            self.df_healthy = pd.read_excel(self.path_healthy, sheet_name="RA")
+            self.df_healthy = pd.read_excel(self.path_healthy)
             self.df_mrs_db = pd.read_excel(self.path_mrs_db, index_col=0) 
             self.df_percentile_rank_db = pd.read_csv(self.path_percentile_rank_db)
             self.df_db = pd.read_excel(self.path_db)
@@ -180,10 +180,6 @@ class EgGutProAnalysis:
             self.df_probio.rename(columns = {"NCBI name": "ncbi_name", "MIrROR name": "microbiome", "subtract": "microbiome_subtract"}, inplace=True)
             self.df_probio = self.df_probio[["ncbi_name", "microbiome", "microbiome_subtract"]]
             
-            self.df_healthy = self.df_healthy[self.df_healthy['Taxonomy'].str.contains('s__')]
-            self.df_healthy['Taxonomy'] = self.df_healthy['Taxonomy'].apply(filter_species)
-            self.df_healthy['Taxonomy'] = self.df_healthy['Taxonomy'].str.replace(' ','_')
-            self.df_healthy = self.df_healthy.rename(columns={'Taxonomy': 'taxa'})
             
             if self.path_exp.split(".")[-1] == 'txt':
                 self.df_exp = pd.read_csv(self.path_exp, sep='\t', header=None)
@@ -373,7 +369,8 @@ class EgGutProAnalysis:
             sys.exit() 
     
         return rv, rvmsg        
-     
+ 
+
     def CalculateHealthyDistance(self): 
         """
         Calculate the Healthy Distance.
@@ -390,33 +387,44 @@ class EgGutProAnalysis:
         
         try: 
             self.df_mrs['HealthyDistance'] = 0     
-                       
+            
+            np_healthy_abundance = self.df_healthy['RA'].to_numpy()
+            np_healthy_abundance = np.append(np_healthy_abundance, 1-np_healthy_abundance.sum())
+            np_healthy_abundance = multiplicative_replacement(np_healthy_abundance)
+            np_healthy_abundance = clr(np_healthy_abundance)
+            
             # Subtract the abundance - df_exp_healthy
             for idx in range(len(self.li_new_sample_name)): 
-                healthy_dist = 0
-                
                 df_exp_one = self.df_exp[['taxa', self.li_new_sample_name[idx]]]
                 df_exp_one = df_exp_one[df_exp_one[self.li_new_sample_name[idx]] != 0]
-                df_exp_one = df_exp_one[df_exp_one[['taxa']].applymap(starts_with_s).any(axis=1)]
+                np_abundance = np.array([], dtype=np.float64).reshape(0,1)
+                np_abundance_others = np.ones((1,1), dtype=float)                
+                
+                for idx_healthy, row_healthy in self.df_healthy.iterrows(): 
+                    micro = row_healthy['microbiome']
+                    np_abundance_temp = np.zeros((1,1), dtype=float)
 
-                for donor in self.df_healthy.iloc[:,1:].columns:
-                    df_healthy_one = self.df_healthy[['taxa', donor]]
-                    df_healthy_one = df_healthy_one[df_healthy_one[donor] != 0]
-                                      
-                    df_merged = pd.merge(df_exp_one, df_healthy_one, how='outer',on='taxa')
-                    df_merged = df_merged.fillna(0)
-                    
-                    np_abundance = df_merged.iloc[:, 1:3]
-                    np_abundance = np.transpose(np_abundance)
-                    np_abundance = multiplicative_replacement(np_abundance)                     
-                    np_abundance = clr(np_abundance)                  
-                    np_abundance = np.transpose(np_abundance)             
-                    
-                    healthy_dist += np.linalg.norm(np_abundance[:, 0] - np_abundance[:, 1])  
-                
+                    condition_append = (df_exp_one.taxa == micro)
+
+                    if len(df_exp_one[condition_append]) > 0:
+                        np_abundance_temp += df_exp_one[condition_append].to_numpy()[:,1:].astype(np.float64)
+                        np_abundance_others -= df_exp_one[condition_append].to_numpy()[:,1:].astype(np.float64)
+
+
+                    np_abundance = np.concatenate((np_abundance,np_abundance_temp),axis=0)
+
+                np_abundance = np.concatenate((np_abundance,np_abundance_others),axis=0)
+                np_abundance = np_abundance.transpose()
+
+                # Apply multiplicative replacement and CLR transformations
+                np_abundance = multiplicative_replacement(np_abundance)
+                np_abundance = clr(np_abundance)   
+            
                 # Calculate healthy distance for each new sample
-                self.df_mrs.loc[self.li_new_sample_name[idx], 'HealthyDistance'] = -healthy_dist / 8                  
+                healthy_dist = np.linalg.norm(np_abundance - np_healthy_abundance)  
                 
+                self.df_mrs.loc[self.li_new_sample_name[idx], 'HealthyDistance'] = -healthy_dist
+            
         except Exception as e:
             print(str(e))
             rv = False
@@ -425,7 +433,7 @@ class EgGutProAnalysis:
             sys.exit()
     
         return rv, rvmsg    
-    
+        
     def CalculatePercentileRank(self):
         """
         Calculate the Percentile Rank and Save the Percentile Rank data as an Csv file.
@@ -473,8 +481,8 @@ class EgGutProAnalysis:
             for category, phenotypes in self.species_specific_categories.items():
                 self.df_percentile_rank[category] = self.df_percentile_rank[phenotypes].mean(axis=1)                
                 
-            self.df_percentile_rank['GMHS'] = ((self.df_percentile_rank['Diversity']*2) + self.df_percentile_rank['DysbiosisBeneficial'] + (1.5*(100-self.df_percentile_rank['DysbiosisHarmful'])) + self.df_percentile_rank['HealthyDistance'])/5.5
-            
+            self.df_percentile_rank['GMHS'] = ((self.df_percentile_rank['Diversity']*2) + self.df_percentile_rank['DysbiosisBeneficial'] + (1.5*(100-self.df_percentile_rank['DysbiosisHarmful'])) + self.df_percentile_rank['HealthyDistance']*0.5)/5
+
             for col in self.df_percentile_rank:
                 self.df_percentile_rank[col] = self.df_percentile_rank[col].astype(float).round()
                      
@@ -542,6 +550,19 @@ class EgGutProAnalysis:
             
             # Type E, B, I, D
             conditions = [
+                (self.df_percentile_rank['GMHS'] >= 0) & (self.df_percentile_rank['GMHS'] < 45),
+
+                (self.df_percentile_rank['GMHS'] >= 45) & (self.df_percentile_rank['GMHS'] < 60),
+
+                (self.df_percentile_rank['GMHS'] >= 60) & (self.df_percentile_rank['GMHS'] < 75),
+
+                (self.df_percentile_rank['GMHS'] >= 75)
+            ]
+            values = ['D', 'B', 'I', 'E']
+            
+            self.df_eval['Type'] = np.select(conditions, values)
+            '''
+            conditions = [
                 (self.df_percentile_rank['Diversity'] >= 60) & (self.df_percentile_rank['Dysbiosis'] >= 60),
                 
                 (self.df_percentile_rank['Diversity'] < 60) & (self.df_percentile_rank['Dysbiosis'] >= 60),
@@ -553,6 +574,7 @@ class EgGutProAnalysis:
             values = ['E', 'B', 'I', 'D']
 
             self.df_eval['Type'] = np.select(conditions, values)
+            '''
             
             '''
             # Print the EBID percentages of the samples

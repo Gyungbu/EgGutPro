@@ -80,7 +80,7 @@ class EgGutProUpdateMRS:
         curdir = os.path.abspath('')
         self.path_exp = path_exp
         self.path_ref = f"{curdir}/input/EGgutPro_mircobe_list.xlsx"
-        self.path_healthy = f"{curdir}/input/EGgutPro_healthy_person_profile_v2.xlsx"
+        self.path_healthy = f"{curdir}/input/20231127_FMTDonor_OnlySp.xlsx"
         
         ## Path of output files
         self.path_db = f"{curdir}/input/EGgutPro_db_abundance.xlsx"
@@ -129,7 +129,7 @@ class EgGutProUpdateMRS:
             self.df_dysbiosis = pd.read_excel(self.path_ref, sheet_name = f"harmful_beneficial_taxa")
             self.df_probio = pd.read_excel(self.path_ref, sheet_name = f"probio_taxa")
 
-            self.df_healthy = pd.read_excel(self.path_healthy, sheet_name="RA")
+            self.df_healthy = pd.read_excel(self.path_healthy)
             self.df_db = pd.read_excel(self.path_db)
             self.df_exp = pd.read_csv(self.path_exp)
     
@@ -140,11 +140,7 @@ class EgGutProUpdateMRS:
             self.df_dysbiosis.rename(columns = {"NCBI name": "ncbi_name", "MIrROR name": "microbiome", "Health sign": "beta", "subtract": "microbiome_subtract", "Exclude": "exclude"}, inplace=True)
             self.df_dysbiosis = self.df_dysbiosis[["ncbi_name", "microbiome", "beta", "microbiome_subtract", "exclude"]]
             self.df_dysbiosis['beta'] = self.df_dysbiosis['beta'].replace({'유해': 1, '유익': -1})
-            
-            self.df_healthy = self.df_healthy[self.df_healthy['Taxonomy'].str.contains('s__')]
-            self.df_healthy['Taxonomy'] = self.df_healthy['Taxonomy'].apply(filter_species)
-            self.df_healthy['Taxonomy'] = self.df_healthy['Taxonomy'].str.replace(' ','_')
-            self.df_healthy = self.df_healthy.rename(columns={'Taxonomy': 'taxa'})            
+                    
                         
         except Exception as e:
             print(str(e))
@@ -346,33 +342,44 @@ class EgGutProUpdateMRS:
         
         try: 
             self.df_mrs['HealthyDistance'] = 0     
-                       
+            
+            np_healthy_abundance = self.df_healthy['RA'].to_numpy()
+            np_healthy_abundance = np.append(np_healthy_abundance, 1-np_healthy_abundance.sum())
+            np_healthy_abundance = multiplicative_replacement(np_healthy_abundance)
+            np_healthy_abundance = clr(np_healthy_abundance)
+            
             # Subtract the abundance - df_exp_healthy
             for idx in range(len(self.li_new_sample_name)): 
-                healthy_dist = 0
-                
                 df_exp_one = self.df_exp[['taxa', self.li_new_sample_name[idx]]]
                 df_exp_one = df_exp_one[df_exp_one[self.li_new_sample_name[idx]] != 0]
-                           
-                for donor in self.df_healthy.iloc[:,1:].columns:
-                    df_healthy_one = self.df_healthy[['taxa', donor]]
-                    df_healthy_one = df_healthy_one[df_healthy_one[donor] != 0]
-                    df_exp_one = df_exp_one[df_exp_one[['taxa']].applymap(starts_with_s).any(axis=1)]
-                                      
-                    df_merged = pd.merge(df_exp_one, df_healthy_one, how='outer',on='taxa')
-                    df_merged = df_merged.fillna(0)
-                    
-                    np_abundance = df_merged.iloc[:, 1:3]
-                    np_abundance = np.transpose(np_abundance)
-                    np_abundance = multiplicative_replacement(np_abundance)                     
-                    np_abundance = clr(np_abundance)                  
-                    np_abundance = np.transpose(np_abundance)             
-                    
-                    healthy_dist += np.linalg.norm(np_abundance[:, 0] - np_abundance[:, 1])  
+                np_abundance = np.array([], dtype=np.float64).reshape(0,1)
+                np_abundance_others = np.ones((1,1), dtype=float)                
                 
+                for idx_healthy, row_healthy in self.df_healthy.iterrows(): 
+                    micro = row_healthy['microbiome']
+                    np_abundance_temp = np.zeros((1,1), dtype=float)
+
+                    condition_append = (df_exp_one.taxa == micro)
+
+                    if len(df_exp_one[condition_append]) > 0:
+                        np_abundance_temp += df_exp_one[condition_append].to_numpy()[:,1:].astype(np.float64)
+                        np_abundance_others -= df_exp_one[condition_append].to_numpy()[:,1:].astype(np.float64)
+
+
+                    np_abundance = np.concatenate((np_abundance,np_abundance_temp),axis=0)
+
+                np_abundance = np.concatenate((np_abundance,np_abundance_others),axis=0)
+                np_abundance = np_abundance.transpose()
+
+                # Apply multiplicative replacement and CLR transformations
+                np_abundance = multiplicative_replacement(np_abundance)
+                np_abundance = clr(np_abundance)   
+            
                 # Calculate healthy distance for each new sample
-                self.df_mrs.loc[self.li_new_sample_name[idx], 'HealthyDistance'] = -healthy_dist / 8                  
+                healthy_dist = np.linalg.norm(np_abundance - np_healthy_abundance)  
                 
+                self.df_mrs.loc[self.li_new_sample_name[idx], 'HealthyDistance'] = -healthy_dist
+            
         except Exception as e:
             print(str(e))
             rv = False
