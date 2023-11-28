@@ -352,6 +352,8 @@ class EgGutProUpdateMRS:
             for idx in range(len(self.li_new_sample_name)): 
                 df_exp_one = self.df_exp[['taxa', self.li_new_sample_name[idx]]]
                 df_exp_one = df_exp_one[df_exp_one[self.li_new_sample_name[idx]] != 0]
+                df_exp_one = df_exp_one[df_exp_one[['taxa']].applymap(starts_with_s).any(axis=1)]
+                
                 np_abundance = np.array([], dtype=np.float64).reshape(0,1)
                 np_abundance_others = np.ones((1,1), dtype=float)                
                 
