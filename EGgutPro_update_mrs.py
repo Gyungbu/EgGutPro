@@ -380,7 +380,7 @@ class EgGutProUpdateMRS:
                 # Calculate healthy distance for each new sample
                 healthy_dist = np.linalg.norm(np_abundance - np_healthy_abundance)  
                 
-                self.df_mrs.loc[self.li_new_sample_name[idx], 'HealthyDistance'] = -healthy_dist
+                self.df_mrs.loc[self.li_new_sample_name[idx], 'HealthyDistance'] = healthy_dist
             
         except Exception as e:
             print(str(e))
@@ -416,7 +416,15 @@ class EgGutProUpdateMRS:
             # Loop through all samples and phenotypes and calculate the percentile rank
             for i in range(len(self.li_new_sample_name)):
                 for j in range(len(self.li_phenotype)):
-                    self.df_percentile_rank.loc[self.li_new_sample_name[i], self.li_phenotype[j]] = (percentileofscore(list(self.df_mrs[self.li_phenotype[j]]), self.df_mrs.loc[self.li_new_sample_name[i], self.li_phenotype[j]], kind='mean')).round(1)
+                    if self.li_phenotype[j] != 'HealthyDistance':
+                        self.df_percentile_rank.loc[self.li_new_sample_name[i], self.li_phenotype[j]] = (percentileofscore(list(self.df_mrs[self.li_phenotype[j]]), self.df_mrs.loc[self.li_new_sample_name[i], self.li_phenotype[j]], kind='mean')).round(1)
+                    
+                    else:                       
+                        distance = self.df_mrs.loc[self.li_new_sample_name[i], self.li_phenotype[j]]                                         
+                        max_distance = self.df_mrs[self.li_phenotype[j]].max() 
+                                                      
+
+                        self.df_percentile_rank.loc[self.li_new_sample_name[i], self.li_phenotype[j]] =  (1-distance/max_distance) * 100 
                  
             # Outliers
             # Replace percentile ranks that are less than or equal to 5 with 5, and those that are greater than or equal to 95 with 95

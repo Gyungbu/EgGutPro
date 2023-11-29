@@ -1,2 +1,2 @@
 ﻿serial_number,DysbiosisHarmful,DysbiosisBeneficial,Diversity,HealthyDistance,뇌질환,심혈관질환,장질환,간질환,자가면역질환,대사질환,GMHS,Type,harmful_abundance[%],beneficial_abundance[%],num_total_species,harmful_mean_abundance[%],beneficial_mean_abundance[%],probio_abundance[%],probio_abundance_mean[%],observed_mean,num_detected_harmful_microbiome,num_detected_probio,Xpos,Ypos,Proteus_mirabilis
-EG23-HU08-NGS-S4H5,주의,나쁨,아주 나쁨,주의,주의,주의,주의,나쁨,나쁨,주의,나쁨,D,6.697754749568197,79.00518134715021,197.0,9.843597736538461,63.830761803409096,0.34196891191709,1.981200733304196,210,15.0,2.0,30.0,27.0,불검출
+EG23-HU08-NGS-S4H5,주의,나쁨,아주 나쁨,주의,주의,주의,주의,나쁨,나쁨,주의,나쁨,D,6.697754749568197,79.00518134715021,197.0,9.72881642263986,63.830761803409096,0.34196891191709,1.981200733304196,210,15.0,2.0,30.0,27.0,불검출

@@ -239,7 +239,39 @@ class EgGutProAnalysis:
             print(f"Error has occurred in the {myNAME} process")    
             
         return rv, rvmsg
+    
+    def TrimInputData(self): 
+        """
+        Trim the input data df_exp.
 
+        Returns:
+        A tuple (success, message), where success is a boolean indicating whether the operation was successful,
+        and message is a string containing a success or error message.
+        """
+        myNAME = self.__class__.__name__+"::"+sys._getframe().f_code.co_name
+        WriteLog(myNAME, "In", type='INFO', fplog=self.__fplog)
+        
+        rv = True
+        rvmsg = "Success"
+        
+        try:          
+            print(self.df_exp)
+                   
+            for idx in range(len(self.li_new_sample_name)):           
+                min_abundance = self.df_exp[self.df_exp[self.li_new_sample_name[idx]] != 0][self.li_new_sample_name].min()
+                print(min_abundance)
+                print(self.df_exp[self.df_exp[self.li_new_sample_name[idx]] == min_abundance])
+
+
+
+
+        except Exception as e:
+            print(str(e))
+            rv = False
+            rvmsg = str(e)
+            print(f"Error has occurred in the {myNAME} process")    
+    
+        return rv, rvmsg
 
     def CalculateMRS(self): 
         """
@@ -424,7 +456,7 @@ class EgGutProAnalysis:
                 # Calculate healthy distance for each new sample
                 healthy_dist = np.linalg.norm(np_abundance - np_healthy_abundance)  
                 
-                self.df_mrs.loc[self.li_new_sample_name[idx], 'HealthyDistance'] = -healthy_dist
+                self.df_mrs.loc[self.li_new_sample_name[idx], 'HealthyDistance'] = healthy_dist
             
         except Exception as e:
             print(str(e))
@@ -460,8 +492,16 @@ class EgGutProAnalysis:
             # Loop through all samples and phenotypes and calculate the percentile rank
             for i in range(len(self.li_new_sample_name)):
                 for j in range(len(self.li_phenotype)):
-                    self.df_percentile_rank.loc[self.li_new_sample_name[i], self.li_phenotype[j]] = (percentileofscore(list(self.df_mrs_db[self.li_phenotype[j]]), self.df_mrs.loc[self.li_new_sample_name[i], self.li_phenotype[j]], kind='mean')).round(1)
-                 
+                    if self.li_phenotype[j] != 'HealthyDistance':
+                        self.df_percentile_rank.loc[self.li_new_sample_name[i], self.li_phenotype[j]] = (percentileofscore(list(self.df_mrs_db[self.li_phenotype[j]]), self.df_mrs.loc[self.li_new_sample_name[i], self.li_phenotype[j]], kind='mean')).round(1)
+                    
+                    else:                     
+                        distance = self.df_mrs.loc[self.li_new_sample_name[i], self.li_phenotype[j]]                                         
+                        max_distance = self.df_mrs_db[self.li_phenotype[j]].max() 
+                                                      
+
+                        self.df_percentile_rank.loc[self.li_new_sample_name[i], self.li_phenotype[j]] =  (1-distance/max_distance) * 100 
+                        
             # Outliers
             # Replace percentile ranks that are less than or equal to 5 with 5, and those that are greater than or equal to 95 with 95
             for i in range(len(self.li_phenotype)):
@@ -516,7 +556,7 @@ class EgGutProAnalysis:
         try:                 
             self.df_eval = pd.DataFrame(index=self.df_percentile_rank.index)
             
-            li_positive_var = ['GMHS', 'Diversity', 'DysbiosisBeneficial', 'HealthyDistance']
+            li_positive_var = ['GMHS', 'Diversity', 'DysbiosisBeneficial']
             
             for col in self.df_percentile_rank:
                 if col in li_positive_var:
@@ -532,7 +572,21 @@ class EgGutProAnalysis:
                     values = ['좋음', '보통', '주의', '나쁨', '아주 나쁨']     
                     
                     self.df_eval[col] = np.select(conditions, values)  
-                                                   
+   
+                elif col == 'HealthyDistance':
+                    # Define the conditions and corresponding values
+                    conditions = [
+                        self.df_percentile_rank[col] >= 50,
+                        (self.df_percentile_rank[col] > 40) & (self.df_percentile_rank[col] < 50),
+                        (self.df_percentile_rank[col] > 30) & (self.df_percentile_rank[col] <= 40),
+                        (self.df_percentile_rank[col] > 20) & (self.df_percentile_rank[col] <= 30),
+                        self.df_percentile_rank[col] <= 20
+                    ]
+                    
+                    values = ['좋음', '보통', '주의', '나쁨', '아주 나쁨']     
+                    
+                    self.df_eval[col] = np.select(conditions, values)             
+                                                      
                 else: # MRS, DysbiosisHarmful
                     # Define the conditions and corresponding values
                     conditions = [
@@ -562,7 +616,9 @@ class EgGutProAnalysis:
             values = ['D', 'B', 'I', 'E']
             
             self.df_eval['Type'] = np.select(conditions, values)
-            '''
+            
+            
+            ##############
             conditions = [
                 (self.df_percentile_rank['Diversity'] >= 60) & (self.df_percentile_rank['Dysbiosis'] >= 60),
                 
@@ -575,9 +631,7 @@ class EgGutProAnalysis:
             values = ['E', 'B', 'I', 'D']
 
             self.df_eval['Type'] = np.select(conditions, values)
-            '''
-            
-            '''
+  
             # Print the EBID percentages of the samples
             E_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] >= 60) & (self.df_percentile_rank_db['Dysbiosis'] >= 60)]
             B_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] < 60) & (self.df_percentile_rank_db['Dysbiosis'] >= 60)]
@@ -593,7 +647,7 @@ class EgGutProAnalysis:
             print("Percentage of samples in B: ", B_percent, '%') 
             print("Percentage of samples in D: ", D_percent, '%')
             print("Percentage of samples in I: ", I_percent, '%')            
-            '''
+            ##############
             
         except Exception as e:
             print(str(e))
@@ -1174,6 +1228,7 @@ if __name__ == '__main__':
     
     eggutanalysis = EgGutProAnalysis(path_exp)
     eggutanalysis.ReadDB()
+    #eggutanalysis.TrimInputData()        
     eggutanalysis.CalculateMRS()    
     eggutanalysis.CalculateDysbiosis()    
     eggutanalysis.CalculateHealthyDistance()
