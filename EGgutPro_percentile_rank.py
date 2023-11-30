@@ -619,6 +619,7 @@ class EgGutProAnalysis:
             
             
             ##############
+            '''
             conditions = [
                 (self.df_percentile_rank['Diversity'] >= 60) & (self.df_percentile_rank['Dysbiosis'] >= 60),
                 
@@ -631,22 +632,25 @@ class EgGutProAnalysis:
             values = ['E', 'B', 'I', 'D']
 
             self.df_eval['Type'] = np.select(conditions, values)
-  
+            '''
+            
+            '''
             # Print the EBID percentages of the samples
-            E_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] >= 60) & (self.df_percentile_rank_db['Dysbiosis'] >= 60)]
-            B_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] < 60) & (self.df_percentile_rank_db['Dysbiosis'] >= 60)]
-            D_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] < 60) & (self.df_percentile_rank_db['Dysbiosis'] < 60)]
-            I_data = self.df_percentile_rank_db[(self.df_percentile_rank_db['Diversity'] >= 60) & (self.df_percentile_rank_db['Dysbiosis'] < 60)]
+            E_data = self.df_eval[(self.df_eval['Type'] == 'E')]
+            B_data = self.df_eval[(self.df_eval['Type'] == 'B')]
+            D_data = self.df_eval[(self.df_eval['Type'] == 'D')]
+            I_data = self.df_eval[(self.df_eval['Type'] == 'I')]
 
-            E_percent = len(E_data) / len(self.df_percentile_rank_db) * 100
-            B_percent = len(B_data) / len(self.df_percentile_rank_db) * 100
-            D_percent = len(D_data) / len(self.df_percentile_rank_db) * 100
-            I_percent = len(I_data) / len(self.df_percentile_rank_db) * 100
+            E_percent = len(E_data) / len(self.df_eval) * 100
+            B_percent = len(B_data) / len(self.df_eval) * 100
+            D_percent = len(D_data) / len(self.df_eval) * 100
+            I_percent = len(I_data) / len(self.df_eval) * 100
             
             print("Percentage of samples in E: ", E_percent, '%')
             print("Percentage of samples in B: ", B_percent, '%') 
             print("Percentage of samples in D: ", D_percent, '%')
-            print("Percentage of samples in I: ", I_percent, '%')            
+            print("Percentage of samples in I: ", I_percent, '%')           
+            '''
             ##############
             
         except Exception as e:
