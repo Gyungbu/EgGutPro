@@ -255,12 +255,15 @@ class EgGutProAnalysis:
         rvmsg = "Success"
         
         try:          
-            print(self.df_exp)
                    
             for idx in range(len(self.li_new_sample_name)):           
-                min_abundance = self.df_exp[self.df_exp[self.li_new_sample_name[idx]] != 0][self.li_new_sample_name].min()
-                print(min_abundance)
-                print(self.df_exp[self.df_exp[self.li_new_sample_name[idx]] == min_abundance])
+                min_abundance = self.df_exp[self.df_exp[self.li_new_sample_name[idx]] != 0].min()[self.li_new_sample_name[idx]]
+                num_min_microbiome = len(self.df_exp.loc[self.df_exp[self.li_new_sample_name[idx]] == min_abundance])
+                self.df_exp.loc[self.df_exp[self.li_new_sample_name[idx]] == min_abundance, self.li_new_sample_name[idx]] = 0
+                
+                self.df_exp[self.li_new_sample_name[idx]] /= (1-min_abundance*num_min_microbiome)
+                
+                print(self.df_exp)
 
 
 
@@ -522,7 +525,7 @@ class EgGutProAnalysis:
             for category, phenotypes in self.species_specific_categories.items():
                 self.df_percentile_rank[category] = self.df_percentile_rank[phenotypes].mean(axis=1)                
                 
-            self.df_percentile_rank['GMHS'] = ((self.df_percentile_rank['Diversity']*2) + self.df_percentile_rank['DysbiosisBeneficial'] + (1.5*(100-self.df_percentile_rank['DysbiosisHarmful'])) + self.df_percentile_rank['HealthyDistance']*0.1)/4.6
+            self.df_percentile_rank['GMHS'] = ((self.df_percentile_rank['Diversity']*2) + self.df_percentile_rank['DysbiosisBeneficial'] + (1.5*(100-self.df_percentile_rank['DysbiosisHarmful'])) + self.df_percentile_rank['HealthyDistance']*0.5)/5
 
             for col in self.df_percentile_rank:
                 self.df_percentile_rank[col] = self.df_percentile_rank[col].astype(float).round()
@@ -1232,7 +1235,7 @@ if __name__ == '__main__':
     
     eggutanalysis = EgGutProAnalysis(path_exp)
     eggutanalysis.ReadDB()
-    #eggutanalysis.TrimInputData()        
+    #eggutanalysis.TrimInputData()      
     eggutanalysis.CalculateMRS()    
     eggutanalysis.CalculateDysbiosis()    
     eggutanalysis.CalculateHealthyDistance()
