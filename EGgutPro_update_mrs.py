@@ -424,7 +424,7 @@ class EgGutProUpdateMRS:
                         max_distance = self.df_mrs[self.li_phenotype[j]].max() 
                                                       
 
-                        self.df_percentile_rank.loc[self.li_new_sample_name[i], self.li_phenotype[j]] =  (1-distance/max_distance) * 100
+                        self.df_percentile_rank.loc[self.li_new_sample_name[i], self.li_phenotype[j]] =  ((1-distance/max_distance) * 100).round(1)
                  
             # Outliers
             # Replace percentile ranks that are less than or equal to 5 with 5, and those that are greater than or equal to 95 with 95
