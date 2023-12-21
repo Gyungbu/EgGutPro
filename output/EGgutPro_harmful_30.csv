@@ -1,4 +1,4 @@
-sample_name,ncbi_name,abundance,abundance_mean
+serial_number,ncbi_name,abundance,abundance_mean
 EG23-HU08-NGS-S4H5,Proteobacteria,0.0573747841105354,0.06353462824825175
 EG23-HU08-NGS-S4H5,Shigella,0.004352331606217581,0.022009821134615387
 EG23-HU08-NGS-S4H5,Escherichia coli,0.004352331606217581,0.022009821134615387
