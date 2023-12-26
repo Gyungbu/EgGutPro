@@ -240,42 +240,6 @@ class EgGutProAnalysis:
             
         return rv, rvmsg
     
-    def TrimInputData(self): 
-        """
-        Trim the input data df_exp.
-
-        Returns:
-        A tuple (success, message), where success is a boolean indicating whether the operation was successful,
-        and message is a string containing a success or error message.
-        """
-        myNAME = self.__class__.__name__+"::"+sys._getframe().f_code.co_name
-        WriteLog(myNAME, "In", type='INFO', fplog=self.__fplog)
-        
-        rv = True
-        rvmsg = "Success"
-        
-        try:          
-                   
-            for idx in range(len(self.li_new_sample_name)):           
-                min_abundance = self.df_exp[self.df_exp[self.li_new_sample_name[idx]] != 0].min()[self.li_new_sample_name[idx]]
-                num_min_microbiome = len(self.df_exp.loc[self.df_exp[self.li_new_sample_name[idx]] == min_abundance])
-                self.df_exp.loc[self.df_exp[self.li_new_sample_name[idx]] == min_abundance, self.li_new_sample_name[idx]] = 0
-                
-                self.df_exp[self.li_new_sample_name[idx]] /= (1-min_abundance*num_min_microbiome)
-                
-                print(self.df_exp)
-
-
-
-
-        except Exception as e:
-            print(str(e))
-            rv = False
-            rvmsg = str(e)
-            print(f"Error has occurred in the {myNAME} process")    
-    
-        return rv, rvmsg
-
     def CalculateMRS(self): 
         """
         Calculate the MRS (Microbiome Risk Score).
@@ -1227,7 +1191,7 @@ class EgGutProAnalysis:
 #####################################
 if __name__ == '__main__':
     
-    #path_exp = "input/EGgutPro_mirror_output_3175.csv"    
+    #path_exp = "input/EGgutPro_mirror_output_3475.csv"    
     #path_exp = "input/EGgutPro_one_sample.csv"
     #path_exp = "input/EGgutPro_sample_input.txt"
     path_exp = "input/BC72_EG23-HU08-NGS-S4H5.txt"
@@ -1235,7 +1199,6 @@ if __name__ == '__main__':
     
     eggutanalysis = EgGutProAnalysis(path_exp)
     eggutanalysis.ReadDB()
-    #eggutanalysis.TrimInputData()      
     eggutanalysis.CalculateMRS()    
     eggutanalysis.CalculateDysbiosis()    
     eggutanalysis.CalculateHealthyDistance()
