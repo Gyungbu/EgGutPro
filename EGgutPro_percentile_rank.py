@@ -94,7 +94,7 @@ class EgGutProAnalysis:
         ## Path of Reference files
         curdir = os.path.dirname(os.path.abspath(__file__))
         self.path_ref = f"{curdir}/input/EGgutPro_mircobe_list.xlsx"       
-        self.path_healthy = f"{curdir}/input/20231127_FMTDonor_OnlySp.xlsx"
+        self.path_healthy = f"{curdir}/input/EGgutPro_health_microbe.xlsx"
         self.path_mrs_db = f"{curdir}/input/EGgutPro_mrs_db.xlsx"
         self.path_percentile_rank_db = f"{curdir}/input/EGgutPro_percentile_rank_db.csv"
         self.path_db = f"{curdir}/input/EGgutPro_db_abundance.xlsx"

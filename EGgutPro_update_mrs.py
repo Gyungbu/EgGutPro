@@ -80,7 +80,7 @@ class EgGutProUpdateMRS:
         curdir = os.path.abspath('')
         self.path_exp = path_exp
         self.path_ref = f"{curdir}/input/EGgutPro_mircobe_list.xlsx"
-        self.path_healthy = f"{curdir}/input/20231127_FMTDonor_OnlySp.xlsx"
+        self.path_healthy = f"{curdir}/input/EGgutPro_health_microbe.xlsx"
         
         ## Path of output files
         self.path_db = f"{curdir}/input/EGgutPro_db_abundance.xlsx"
